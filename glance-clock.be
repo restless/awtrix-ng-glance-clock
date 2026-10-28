@@ -295,6 +295,13 @@ class GlanceClock
   end
 
   # the icon for WMO weather code c, its top left corner at (x, y)
+  # a small cloud, 3 rows, leaving 4 rows below it for rain, snow or a bolt
+  def small_cloud(x, y, col)
+    line(x + 2, y, x + 5, y, col)
+    line(x + 1, y + 1, x + 6, y + 1, col)
+    line(x + 1, y + 2, x + 6, y + 2, col)
+  end
+
   def wicon(x, y, c, isday)
     var sun = self.ic(0xFFD000)
     var moon = self.ic(0xD0D0A0)
@@ -328,15 +335,16 @@ class GlanceClock
       line(x, y + 2, x + 7, y + 2, f) line(x + 1, y + 4, x + 6, y + 4, f) line(x, y + 6, x + 7, y + 6, f)
     elif c >= 71 && c <= 77 || c == 85 || c == 86
       var w = self.ic(0xFFFFFF)
-      self.cloud(x, y, self.ic(0xA0A0A0))
-      pixel(x + 1, y + 5, w) pixel(x + 4, y + 6, w) pixel(x + 6, y + 5, w) pixel(x + 2, y + 7, w) pixel(x + 5, y + 7, w)
+      self.small_cloud(x, y, self.ic(0xA0A0A0))
+      line(x, y + 5, x + 2, y + 5, w) line(x + 1, y + 4, x + 1, y + 6, w)              # two flakes
+      line(x + 4, y + 6, x + 6, y + 6, w) line(x + 5, y + 5, x + 5, y + 7, w)
     elif c >= 95
-      self.cloud(x, y, self.ic(0x707070))
-      line(x + 4, y + 4, x + 3, y + 5, sun) line(x + 3, y + 5, x + 5, y + 5, sun) line(x + 5, y + 5, x + 3, y + 7, sun)
+      self.small_cloud(x, y, self.ic(0x707070))
+      line(x + 4, y + 3, x + 2, y + 5, sun) line(x + 2, y + 5, x + 5, y + 5, sun) line(x + 5, y + 5, x + 3, y + 7, sun)
     else                          # drizzle and rain: 51-67, 80-82
       var d = self.ic(0x3080FF)
-      self.cloud(x, y, self.ic(0x8090A0))
-      line(x + 1, y + 5, x, y + 7, d) line(x + 4, y + 5, x + 3, y + 7, d) line(x + 7, y + 5, x + 6, y + 7, d)
+      self.small_cloud(x, y, self.ic(0x8090A0))
+      line(x + 2, y + 4, x + 1, y + 7, d) line(x + 4, y + 4, x + 3, y + 7, d) line(x + 6, y + 4, x + 5, y + 7, d)
     end
   end
 
