@@ -4,6 +4,8 @@
 # @version 0.1
 # @display 52x16
 # @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
+# @config  wday   bool   "Weekday in the date"            default=true group="Date"
+# @config  dfmt   select "Date format"                    default=dd.mm options=dd.mm,dd.mm.yy,mm/dd,mm/dd/yy group="Date"
 # @config  lat    number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
 # @config  lon    number "Longitude"                      default=13.405 min=-180 max=180 step=0.0001 group="Weather"
 # @config  wref   number "Weather refresh"                default=10 min=5 max=60 unit=min group="Weather"
@@ -54,9 +56,7 @@ class GlanceClock
     if h >= 0
       var m = minute()
       self.ts = (h < 10 ? "0" : "") + str(h) + ":" + (m < 10 ? "0" : "") + str(m)
-      var d = day()
-      var mo = month()
-      self.ds = self.days[weekday()] + " " + str(d) + "." + (mo < 10 ? "0" : "") + str(mo)
+      self.ds = self.date_text()
     end
     if self.ticks <= 0 && !self.busy
       self.ticks = int(store.get("wref")) * 60
@@ -64,6 +64,23 @@ class GlanceClock
       http.get(self.url, / b, st -> self.on_wx(b, st), {'find': "\"current\":{", 'keep': 200})
     end
     self.ticks -= 1
+  end
+
+  def date_text()
+    var d = day()
+    var dd = (d < 10 ? "0" : "") + str(d)
+    var mo = month()
+    var mm = (mo < 10 ? "0" : "") + str(mo)
+    var y = year() % 100
+    var yy = (y < 10 ? "0" : "") + str(y)
+    var f = store.get("dfmt")
+    var s
+    if f == "dd.mm.yy"     s = dd + "." + mm + "." + yy
+    elif f == "mm/dd"      s = mm + "/" + dd
+    elif f == "mm/dd/yy"   s = mm + "/" + dd + "/" + yy
+    else                   s = dd + "." + mm
+    end
+    return store.get("wday") ? self.days[weekday()] + " " + s : s
   end
 
   def on_wx(b, st)
