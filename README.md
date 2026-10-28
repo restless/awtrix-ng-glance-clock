@@ -21,7 +21,8 @@ are drawn by the script, so there is nothing to install.
 ## Features
 
 - Four corners, each showing whatever you pick: weather, time, date, an MQTT reading, the
-  outdoor humidity, the feels-like temperature, today's high/low, tomorrow's weather, or nothing
+  outdoor humidity, the feels-like temperature, today's high/low, tomorrow's weather, the chance
+  of rain, the wind, the next sunrise or sunset, or nothing
 
   ![Corners swapped](docs/layout-swapped.png) ![Without Home Assistant: humidity, feels-like, high/low, tomorrow](docs/no-ha.png)
 - Small time with a steady, blinking or pulsing colon, 24h or 12h with AM/PM; and the date; weekday names in English, Polish, German,
@@ -70,6 +71,7 @@ The default is Berlin.
 | Today, Other days | white, grey | the week bar's colours |
 | Latitude, Longitude | Berlin | the place whose weather is shown |
 | Temperature unit | C | C or F |
+| Wind unit | km/h | km/h, m/s or mph |
 | Weather refresh | 10 min | how often the weather is fetched |
 | MQTT topic | empty | a topic on the broker set in AWTRIX's MQTT settings; empty hides the reading |
 | Unit | ° | added after the value, e.g. `°` or `%`; empty for text |
@@ -98,7 +100,12 @@ on the left; keep them short.
 | Feels like | feels-like temperature, e.g. `~10°` | internet |
 | High/low today | today's high and low, e.g. `14/5°` | internet |
 | Tomorrow | tomorrow's icon and high | internet |
+| Rain chance today | today's highest chance of rain, with a rain icon | internet |
+| Wind | current wind speed, e.g. `6km/h` | internet |
+| Sunrise/sunset | the next sunrise or sunset, arrow up or down | internet |
 | Empty | nothing | |
+
+![Rain chance, wind, sunset and tomorrow](docs/more-corners.png)
 
 Left corners start at the left edge, right corners end at the right edge. Keep the wider elements
 (time, date) apart from each other on one row, or they overlap.

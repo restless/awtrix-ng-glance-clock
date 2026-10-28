@@ -1,7 +1,7 @@
 # @name    Glance Clock
 # @desc    Time, date, outdoor weather with an icon and an MQTT reading on one screen, small and tidy (52x16 and larger)
 # @author  restless
-# @version 0.4
+# @version 0.5
 # @display 52x16
 # @config  t12    select "Hour format"                    default=24h options=24h,12h group="Time"
 # @config  ampm   bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
