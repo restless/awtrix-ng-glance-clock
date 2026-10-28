@@ -93,7 +93,7 @@ class GlanceClock
     elif c == 0 || c == 1
       if self.day == 1
         self.sun(3, 3, 2)
-        pixel(3, 0, 0xFFD000) pixel(3, 7, 0xFFD000) pixel(0, 3, 0xFFD000) pixel(6, 3, 0xFFD000)
+        pixel(3, 0, 0xFFD000) pixel(3, 6, 0xFFD000) pixel(0, 3, 0xFFD000) pixel(6, 3, 0xFFD000)
         pixel(1, 1, 0xFFD000) pixel(5, 1, 0xFFD000) pixel(1, 5, 0xFFD000) pixel(5, 5, 0xFFD000)
       else
         circle_fill(3, 3, 3, 0xD0D0A0)
