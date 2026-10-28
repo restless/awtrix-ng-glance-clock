@@ -11,10 +11,10 @@
 # @config  ampm    bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
 # @config  tlz     bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
 # @config  tsep    select "Colon"                          default=steady options=steady,blink,pulse group="Time"
-# @config  lang    select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
+# @config  lang    select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday and month names" group="Date"
 # @config  wday    bool   "Weekday in the date"            default=true group="Date"
-# @config  dfmt    select "Date format"                    default=dd.mm options=dd.mm,dd.mm.yy,dd-mm,dd-mm-yy,mm/dd,mm/dd/yy,yyyy-mm-dd,custom group="Date"
-# @config  dcust   text   "Custom date format"             default="d.mm.yy" maxlen=24 help="For Date format custom: dd d mm m yyyy yy ww (weekday), anything else as typed" group="Date"
+# @config  dfmt    select "Date format"                    default=dd.mm options="dd.mm,dd.mm.yy,dd-mm,dd-mm-yy,mm/dd,mm/dd/yy,yyyy-mm-dd,mon dd,dd mon,custom" group="Date"
+# @config  dcust   text   "Custom date format"             default="d.mm.yy" maxlen=24 help="For Date format custom: dd d mm m mon (month name) yyyy yy ww (weekday); the rest as typed" group="Date"
 # @config  wbar    bool   "Week bar"                       default=false help="Seven dashes on the bottom row, today lit" group="Week bar"
 # @config  wmon    bool   "Week starts on Monday"          default=true group="Week bar"
 # @config  lat     number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
@@ -64,7 +64,7 @@ class GlanceClock
   var rk, rv, rlast, rmaps
   var hum, feels, hilo, tmax, tcode, rain, wind
   var sunev, suntxt, sunicon
-  var days
+  var days, months
   var night, nfrom, nto, col
   var slots
 
@@ -102,6 +102,14 @@ class GlanceClock
       "Українська": ["НД", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"]
     }
     self.days = names.find(store.get("lang"), names["English"])
+    var mnames = {
+      "English":    ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
+      "Polski":     ["STY", "LUT", "MAR", "KWI", "MAJ", "CZE", "LIP", "SIE", "WRZ", "PAŹ", "LIS", "GRU"],
+      "Deutsch":    ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"],
+      "Français":   ["JAN", "FÉV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOÛ", "SEP", "OCT", "NOV", "DÉC"],
+      "Українська": ["СІЧ", "ЛЮТ", "БЕР", "КВІ", "ТРА", "ЧЕР", "ЛИП", "СЕР", "ВЕР", "ЖОВ", "ЛИС", "ГРУ"]
+    }
+    self.months = mnames.find(store.get("lang"), mnames["English"])
     self.night = nil
     self.nfrom = self.parse_hm(store.get("nfrom"))
     self.nto = self.parse_hm(store.get("nto"))
@@ -299,6 +307,7 @@ class GlanceClock
       elif t[0..1] == "dd"          out += (d < 10 ? "0" : "") + str(d)  i += 2
       elif t[0..1] == "mm"          out += (mo < 10 ? "0" : "") + str(mo)  i += 2
       elif t[0..1] == "ww"          out += self.days[weekday()]  i += 2
+      elif t[0..2] == "mon"         out += self.months[mo - 1]  i += 3
       elif t[0] == "d"              out += str(d)  i += 1
       elif t[0] == "m"              out += str(mo)  i += 1
       else                          out += p[i]  i += 1
