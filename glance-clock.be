@@ -3,10 +3,10 @@
 # @author  restless
 # @version 0.6
 # @display 52x16
-# @config  tl      select "Top left"                       default="Weather now" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
-# @config  tr      select "Top right"                      default="Time" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
-# @config  bl      select "Bottom left"                    default="MQTT reading 1" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
-# @config  br      select "Bottom right"                   default="Date" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  tl      select "Top left"                       default="Weather now" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  tr      select "Top right"                      default="Time" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  bl      select "Bottom left"                    default="MQTT reading 1" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  br      select "Bottom right"                   default="Date" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
 # @config  t12     select "Hour format"                    default=24h options=24h,12h group="Time"
 # @config  ampm    bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
 # @config  tlz     bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
@@ -36,6 +36,20 @@
 # @config  r2unit  text   "Unit"                           default="°" maxlen=4 help="Added after numbers, e.g. ° or %" group="MQTT reading 2"
 # @config  r2label text   "Label"                          default="" maxlen=6 help="Short text before the value, e.g. In" group="MQTT reading 2"
 # @config  r2stale number "Offline after"                  default=0 min=0 max=1440 unit=min help="Shows off when nothing arrived for this long; 0 never" group="MQTT reading 2"
+# @config  r3topic text   "Topic"                          default="" help="e.g. 'zigbee2mqtt/door', or a topic Home Assistant publishes to" group="MQTT reading 3"
+# @config  r3json  text   "JSON field"                     default="" help="Empty for plain values. For {'temperature': 21.5} enter 'temperature', nested: 'room.temp'" group="MQTT reading 3"
+# @config  r3map   text   "Replace values"                 default="" help="Comma separated pairs, e.g. 'true=Closed,false=Open' or 'ON=On,OFF=Off'" group="MQTT reading 3"
+# @config  r3dec   select "Decimals"                       default="0" options="as sent,0,1,2" help="Digits after the point for numbers" group="MQTT reading 3"
+# @config  r3unit  text   "Unit"                           default="°" maxlen=4 help="Added after numbers, e.g. ° or %" group="MQTT reading 3"
+# @config  r3label text   "Label"                          default="" maxlen=6 help="Short text before the value, e.g. In" group="MQTT reading 3"
+# @config  r3stale number "Offline after"                  default=0 min=0 max=1440 unit=min help="Shows off when nothing arrived for this long; 0 never" group="MQTT reading 3"
+# @config  r4topic text   "Topic"                          default="" help="e.g. 'zigbee2mqtt/door', or a topic Home Assistant publishes to" group="MQTT reading 4"
+# @config  r4json  text   "JSON field"                     default="" help="Empty for plain values. For {'temperature': 21.5} enter 'temperature', nested: 'room.temp'" group="MQTT reading 4"
+# @config  r4map   text   "Replace values"                 default="" help="Comma separated pairs, e.g. 'true=Closed,false=Open' or 'ON=On,OFF=Off'" group="MQTT reading 4"
+# @config  r4dec   select "Decimals"                       default="0" options="as sent,0,1,2" help="Digits after the point for numbers" group="MQTT reading 4"
+# @config  r4unit  text   "Unit"                           default="°" maxlen=4 help="Added after numbers, e.g. ° or %" group="MQTT reading 4"
+# @config  r4label text   "Label"                          default="" maxlen=6 help="Short text before the value, e.g. In" group="MQTT reading 4"
+# @config  r4stale number "Offline after"                  default=0 min=0 max=1440 unit=min help="Shows off when nothing arrived for this long; 0 never" group="MQTT reading 4"
 # @config  dbri    slider "Brightness"                     default=0 min=0 max=255 help="0 leaves the device brightness alone" group="Day"
 # @config  tcol    color  "Time colour"                    default=#FFFFFF group="Day"
 # @config  dcol    color  "Date colour"                    default=#8888AA group="Day"
@@ -82,13 +96,15 @@ class GlanceClock
     self.ap = ""
     self.ds = ""
     self.out = nil
-    # setting keys of reading 1 and 2: topic, JSON field, replacements, decimals, unit, label, offline after
+    # setting keys of readings 1 to 4: topic, JSON field, replacements, decimals, unit, label, offline after
     self.rk = [["rtopic", "rjson", "rmap", "rdec", "runit", "rlabel", "rstale"],
-               ["r2topic", "r2json", "r2map", "r2dec", "r2unit", "r2label", "r2stale"]]
-    self.rv = [nil, nil]
-    self.rlast = [now_ms(), now_ms()]
+               ["r2topic", "r2json", "r2map", "r2dec", "r2unit", "r2label", "r2stale"],
+               ["r3topic", "r3json", "r3map", "r3dec", "r3unit", "r3label", "r3stale"],
+               ["r4topic", "r4json", "r4map", "r4dec", "r4unit", "r4label", "r4stale"]]
+    self.rv = [nil, nil, nil, nil]
+    self.rlast = [now_ms(), now_ms(), now_ms(), now_ms()]
     self.rmaps = []
-    for i : 0..1 self.rmaps.push(self.parse_map(store.get(self.rk[i][2]))) end
+    for i : 0..3 self.rmaps.push(self.parse_map(store.get(self.rk[i][2]))) end
     self.code = -1
     self.tcode = -1
     self.sunev = nil
@@ -117,7 +133,8 @@ class GlanceClock
     # the labels picked in the web UI, and the short names stored by 0.4
     var ids = {
       "Weather now": "weather", "Time": "time", "Date": "date",
-      "MQTT reading 1": "reading1", "MQTT reading 2": "reading2", "MQTT reading": "reading1", "reading": "reading1",
+      "MQTT reading 1": "reading1", "MQTT reading 2": "reading2",
+      "MQTT reading 3": "reading3", "MQTT reading 4": "reading4", "MQTT reading": "reading1", "reading": "reading1",
       "Humidity outdoors": "humidity", "Feels like": "feels", "High/low today": "hilo",
       "Weather tomorrow": "tomorrow", "Tomorrow": "tomorrow", "Rain chance today": "rain", "Wind": "wind",
       "Sunrise/sunset": "sun", "Empty": "none"
@@ -187,21 +204,21 @@ class GlanceClock
   end
 
   def setup()
-    for i : 0..1 self.setup_reading(i) end
+    for i : 0..3 self.setup_reading(i) end
   end
 
   def setup_reading(i)
     var t = store.get(self.rk[i][0])
     if size(t) == 0 return end
     # a restart (e.g. saving the settings) would leave the corner empty until the next message
-    var lk = i == 0 ? "last" : "last2"
+    var lk = i == 0 ? "last" : "last" + str(i + 1)
     if store.get(lk + "_topic", "") == t self.show_reading(i, store.get(lk + "_value")) end
     mqtt.subscribe(t, / tp, p -> self.on_reading(i, p))
   end
 
   def on_reading(i, p)
     p = str(p)
-    var lk = i == 0 ? "last" : "last2"
+    var lk = i == 0 ? "last" : "last" + str(i + 1)
     if p != store.get(lk + "_value", nil)
       store.set(lk + "_topic", store.get(self.rk[i][0]))
       store.set(lk + "_value", p)
@@ -474,6 +491,8 @@ class GlanceClock
     if what == "date"           t = self.ds  k = 1
     elif what == "reading1"     t = self.reading_text(0)  k = 3
     elif what == "reading2"     t = self.reading_text(1)  k = 3
+    elif what == "reading3"     t = self.reading_text(2)  k = 3
+    elif what == "reading4"     t = self.reading_text(3)  k = 3
     elif what == "humidity"     t = self.hum
     elif what == "feels"        t = self.feels
     elif what == "hilo"         t = self.hilo
