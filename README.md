@@ -66,7 +66,7 @@ The default is Berlin.
 | Leading zero | on | 08:05 rather than 8:05 |
 | Colon | steady | steady, blink or pulse |
 | Language | English | weekday and month names: English, Polski, Deutsch, Français, Українська |
-| Weekday in the date | on | |
+| Weekday in the date | on | for the presets; a custom format places the weekday itself with `ww` |
 | Date format | dd.mm | dd.mm, dd.mm.yy, dd-mm, dd-mm-yy, mm/dd, mm/dd/yy, yyyy-mm-dd, mon dd (`OCT 28`), dd mon or custom |
 | Custom date format | d.mm.yy | used when Date format is custom: `dd` `d` `mm` `m` `mon` (month name) `yyyy` `yy` `ww` (weekday); anything else is shown as typed, e.g. `ww d·m` |
 | Week bar | off | seven dashes on the bottom row, today lit |

@@ -12,9 +12,9 @@
 # @config  tlz     bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
 # @config  tsep    select "Colon"                          default=steady options=steady,blink,pulse group="Time"
 # @config  lang    select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday and month names" group="Date"
-# @config  wday    bool   "Weekday in the date"            default=true group="Date"
+# @config  wday    bool   "Weekday in the date"            default=true help="For the presets; a custom format places it with ww" group="Date"
 # @config  dfmt    select "Date format"                    default=dd.mm options="dd.mm,dd.mm.yy,dd-mm,dd-mm-yy,mm/dd,mm/dd/yy,yyyy-mm-dd,mon dd,dd mon,custom" group="Date"
-# @config  dcust   text   "Custom date format"             default="d.mm.yy" maxlen=24 help="For Date format custom: dd d mm m mon (month name) yyyy yy ww (weekday); the rest as typed" group="Date"
+# @config  dcust   text   "Custom date format"             default="d.mm.yy" maxlen=24 help="dd d mm m mon (month name) yyyy yy ww (weekday), e.g. 'ww dd.mm' or 'mon d, yyyy'" group="Date"
 # @config  wbar    bool   "Week bar"                       default=false help="Seven dashes on the bottom row, today lit" group="Week bar"
 # @config  wmon    bool   "Week starts on Monday"          default=true group="Week bar"
 # @config  lat     number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
@@ -306,7 +306,8 @@ class GlanceClock
 
   def date_text()
     var f = store.get("dfmt")
-    var s = self.fmt_date(f == "custom" ? store.get("dcust") : f)
+    if f == "custom" return self.fmt_date(store.get("dcust")) end      # the pattern places the weekday with ww
+    var s = self.fmt_date(f)
     return store.get("wday") ? self.days[weekday()] + " " + s : s
   end
 
