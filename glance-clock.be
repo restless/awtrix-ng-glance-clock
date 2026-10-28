@@ -6,10 +6,10 @@
 # @config  t12    select "Hour format"                    default=24h options=24h,12h group="Time"
 # @config  ampm   bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
 # @config  tlz    bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
-# @config  tl     select "Top left"                       default=weather options=weather,time,date,reading,none group="Layout"
-# @config  tr     select "Top right"                      default=time options=weather,time,date,reading,none group="Layout"
-# @config  bl     select "Bottom left"                    default=reading options=weather,time,date,reading,none group="Layout"
-# @config  br     select "Bottom right"                   default=date options=weather,time,date,reading,none group="Layout"
+# @config  tl     select "Top left"                       default=weather options=weather,time,date,reading,humidity,feels,hilo,tomorrow,none group="Layout"
+# @config  tr     select "Top right"                      default=time options=weather,time,date,reading,humidity,feels,hilo,tomorrow,none group="Layout"
+# @config  bl     select "Bottom left"                    default=reading options=weather,time,date,reading,humidity,feels,hilo,tomorrow,none group="Layout"
+# @config  br     select "Bottom right"                   default=date options=weather,time,date,reading,humidity,feels,hilo,tomorrow,none group="Layout"
 # @config  tsep   select "Colon"                          default=steady options=steady,blink,pulse group="Time"
 # @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
 # @config  wday   bool   "Weekday in the date"            default=true group="Date"
@@ -46,13 +46,15 @@
 class GlanceClock
   var url, ticks, busy
   var ts, hh, mm, ap, ds, out, reading, code, day
+  var hum, feels, hilo, tmax, tcode
   var days
   var night, nfrom, nto, col
   var slots
 
   def init()
     self.url = "https://api.open-meteo.com/v1/forecast?latitude=" + str(store.get("lat")) +
-               "&longitude=" + str(store.get("lon")) + "&current=temperature_2m,weather_code,is_day" +
+               "&longitude=" + str(store.get("lon")) + "&current=temperature_2m,weather_code,is_day,relative_humidity_2m,apparent_temperature" +
+               "&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=2&timezone=auto" +
                (store.get("unit") == "F" ? "&temperature_unit=fahrenheit" : "")
     self.ticks = 0
     self.busy = false
@@ -64,6 +66,7 @@ class GlanceClock
     self.out = nil
     self.reading = nil
     self.code = -1
+    self.tcode = -1
     self.day = 1
     var names = {
       "English":    ["SU", "MO", "TU", "WE", "TH", "FR", "SA"],
@@ -167,7 +170,7 @@ class GlanceClock
     if self.ticks <= 0 && !self.busy
       self.ticks = int(store.get("wref")) * 60
       self.busy = true
-      http.get(self.url, / b, st -> self.on_wx(b, st), {'find': "\"current\":{", 'keep': 200})
+      http.get(self.url, / b, st -> self.on_wx(b, st), {'cap': 3072})
     end
     self.ticks -= 1
   end
@@ -200,6 +203,11 @@ class GlanceClock
     return out
   end
 
+  def deg(v)
+    return str(int(v + (v < 0 ? -0.5 : 0.5))) + "°"
+  end
+
+  # current values first, then today's and tomorrow's from the daily arrays
   def on_wx(b, st)
     self.busy = false
     if b == nil
@@ -209,12 +217,22 @@ class GlanceClock
     var t = re.search("temperature_2m\":(-?[0-9.]+)", b)
     var c = re.search("weather_code\":([0-9]+)", b)
     var d = re.search("is_day\":([01])", b)
-    if t != nil
-      var v = real(t[1])
-      self.out = str(int(v + (v < 0 ? -0.5 : 0.5))) + "°"
-    end
+    var h = re.search("relative_humidity_2m\":([0-9.]+)", b)
+    var f = re.search("apparent_temperature\":(-?[0-9.]+)", b)
+    var hi = re.search("temperature_2m_max\":\\[(-?[0-9.]+),(-?[0-9.]+)", b)
+    var lo = re.search("temperature_2m_min\":\\[(-?[0-9.]+),(-?[0-9.]+)", b)
+    var dc = re.search("weather_code\":\\[([0-9]+),([0-9]+)", b)
+    if t != nil self.out = self.deg(real(t[1])) end
     if c != nil self.code = int(c[1]) end
     if d != nil self.day = int(d[1]) end
+    if h != nil self.hum = str(int(real(h[1]))) + "%" end
+    if f != nil self.feels = "~" + self.deg(real(f[1])) end
+    if hi != nil && lo != nil
+      var l = self.deg(real(lo[1]))
+      self.hilo = self.deg(real(hi[1]))[0..-3] + "/" + l          # 18/9°: one degree sign
+      self.tmax = self.deg(real(hi[2]))
+    end
+    if dc != nil self.tcode = int(dc[2]) end
   end
 
   # --- 8x8 weather icons, drawn by hand so nothing has to be installed ---
@@ -304,16 +322,28 @@ class GlanceClock
     var y = i < 2 ? 6 : 14
     if what == "time"
       self.draw_time(right ? w - text_ink_width(self.ts) - 1 : 1, y, self.col[0])
-    elif what == "date"
-      text(right ? w - text_ink_width(self.ds) - 1 : 1, y, self.ds, self.col[1])
-    elif what == "reading"
-      if self.reading != nil text(right ? w - text_ink_width(self.reading) - 1 : 1, y, self.reading, self.col[3]) end
-    elif what == "weather"
-      var tw = self.out != nil ? text_ink_width(self.out) : 0
-      var x = right ? w - tw - 11 : 0
-      if !self.night || store.get("nicon") self.wicon(x, y - 6, self.code, self.day == 1) end
-      if self.out != nil text(x + 10, y, self.out, self.col[2]) end
+      return
     end
+    var t = nil            # the text, its colour, and the icon in front of it (-1: none)
+    var k = 2
+    var icon = -1
+    var isday = true
+    if what == "date"           t = self.ds  k = 1
+    elif what == "reading"      t = self.reading  k = 3
+    elif what == "humidity"     t = self.hum
+    elif what == "feels"        t = self.feels
+    elif what == "hilo"         t = self.hilo
+    elif what == "weather"      t = self.out  icon = self.code  isday = self.day == 1
+    elif what == "tomorrow"     t = self.tmax  icon = self.tcode
+    end
+    if self.night && !store.get("nicon") icon = -1 end
+    var tw = t != nil ? text_ink_width(t) : 0
+    var iw = icon >= 0 ? 10 : 0
+    var x = right ? w - tw - iw - 1 : (iw > 0 ? 0 : 1)
+    if icon >= 0      # a bottom icon moves up a row to keep clear of the week bar
+      self.wicon(x, y - (i >= 2 && store.get("wbar") ? 7 : 6), icon, isday)
+    end
+    if t != nil text(x + iw, y, t, self.col[k]) end
   end
 
   def draw()
