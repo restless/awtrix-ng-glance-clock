@@ -444,12 +444,17 @@ class GlanceClock
     var moon = self.ic(0xD0D0A0)
     if c < 0
       return
-    elif c >= 1000
+    elif c == 1002                # wind: three gusts with curled ends
+      var g = self.ic(0xA0C8E0)
+      line(x, y + 1, x + 4, y + 1, g) pixel(x + 5, y, g)
+      line(x, y + 3, x + 6, y + 3, g) pixel(x + 7, y + 2, g)
+      line(x, y + 5, x + 3, y + 5, g) pixel(x + 4, y + 6, g)
+    elif c >= 1000                # sunrise 1000, sunset 1001: ^ or v over a half sun, rows 2-6
       var o = self.ic(0xFF9000)
-      if c == 1000 pixel(x + 3, y, sun) pixel(x + 2, y + 1, sun) pixel(x + 4, y + 1, sun)
-      else pixel(x + 2, y, sun) pixel(x + 4, y, sun) pixel(x + 3, y + 1, sun)
+      if c == 1000 pixel(x + 3, y + 1, sun) pixel(x + 2, y + 2, sun) pixel(x + 4, y + 2, sun)
+      else pixel(x + 2, y + 1, sun) pixel(x + 4, y + 1, sun) pixel(x + 3, y + 2, sun)
       end
-      line(x + 2, y + 3, x + 4, y + 3, sun) rect_fill(x + 1, y + 4, 5, 2, sun)
+      line(x + 2, y + 4, x + 4, y + 4, sun) line(x + 1, y + 5, x + 5, y + 5, sun)
       line(x, y + 6, x + 6, y + 6, o)
     elif c == 0 || c == 1
       if isday
@@ -547,7 +552,7 @@ class GlanceClock
     elif what == "weather"      t = self.out  icon = self.code  isday = self.day == 1
     elif what == "tomorrow"     t = self.tmax  icon = self.tcode
     elif what == "rain"         t = self.rain  icon = self.rain != nil ? 61 : -1
-    elif what == "wind"         t = self.wind
+    elif what == "wind"         t = self.wind  icon = self.wind != nil ? 1002 : -1
     elif what == "sun"          t = self.suntxt  icon = self.sunicon
     end
     if k == 2 && what != "none" && self.weather_stale()                  # every weather element when the forecast is old
