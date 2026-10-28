@@ -514,7 +514,9 @@ class GlanceClock
     var right = i == 1 || i == 3
     var y = i < 2 ? 6 : height() - 2           # the bottom row follows the panel height
     if what == "time"
-      self.draw_time(right ? w - text_ink_width(self.ts) - 1 : 1, y, self.col[0])
+      var tx = right ? w - text_ink_width(self.ts) - 1 : 1
+      if right self.clear_from(tx, y) end
+      self.draw_time(tx, y, self.col[0])
       return
     end
     var t = nil            # the text, its colour, and the icon in front of it (-1: none)
@@ -542,16 +544,23 @@ class GlanceClock
     var tw = t != nil ? text_ink_width(t) : 0
     var iw = icon >= 0 ? 10 : 0
     var x = right ? w - tw - iw - 1 : (iw > 0 ? 0 : 1)
+    if right && (t != nil || icon >= 0) self.clear_from(x, y) end
     if icon >= 0      # a bottom icon moves up a row to keep clear of the week bar
       self.wicon(x, y - (i >= 2 && store.get("wbar") ? 7 : 6), icon, isday)
     end
     if t != nil text(x + iw, y, t, self.col[k]) end
   end
 
+  # a right corner wins over a left one that runs into it: the row is blanked from one
+  # column before the right corner's start, above the week bar
+  def clear_from(x, y)
+    rect_fill(x - 1, y - 7, width() - x + 1, 8, 0)
+  end
+
   def draw()
     clear()
     var w = width()
-    for i : 0..3 self.draw_slot(i, w) end
+    for i : [0, 2, 1, 3] self.draw_slot(i, w) end      # left corners first, right ones on top
     if store.get("wbar") self.week_bar(w) end
   end
 end
