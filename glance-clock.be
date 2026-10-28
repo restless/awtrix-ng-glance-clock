@@ -3,10 +3,10 @@
 # @author  restless
 # @version 0.5
 # @display 52x16
-# @config  tl     select "Top left"                       default="Weather now" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Weather tomorrow,Rain chance today,Wind,Sunrise/sunset,Empty" group="Layout"
-# @config  tr     select "Top right"                      default="Time" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Weather tomorrow,Rain chance today,Wind,Sunrise/sunset,Empty" group="Layout"
-# @config  bl     select "Bottom left"                    default="MQTT reading" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Weather tomorrow,Rain chance today,Wind,Sunrise/sunset,Empty" group="Layout"
-# @config  br     select "Bottom right"                   default="Date" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Weather tomorrow,Rain chance today,Wind,Sunrise/sunset,Empty" group="Layout"
+# @config  tl     select "Top left"                       default="Weather now" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  tr     select "Top right"                      default="Time" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  bl     select "Bottom left"                    default="MQTT reading" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  br     select "Bottom right"                   default="Date" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
 # @config  t12    select "Hour format"                    default=24h options=24h,12h group="Time"
 # @config  ampm   bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
 # @config  tlz    bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
