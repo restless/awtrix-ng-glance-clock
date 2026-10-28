@@ -176,6 +176,10 @@ corner.
 - AWTRIX NG with scripting, on a panel of at least 52×16 pixels
 - Internet access for the weather, an MQTT broker for the readings
 
+## What next
+
+Ideas for later versions are in [IDEAS.md](IDEAS.md).
+
 ## License
 
 [MIT](LICENSE)
