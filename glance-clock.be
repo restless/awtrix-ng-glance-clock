@@ -512,11 +512,12 @@ class GlanceClock
       line(x, y + 1, x + 4, y + 1, g) pixel(x + 5, y, g)
       line(x, y + 3, x + 6, y + 3, g) pixel(x + 7, y + 2, g)
       line(x, y + 5, x + 3, y + 5, g) pixel(x + 4, y + 6, g)
-    elif c >= 1000                # sunrise 1000 (yellow), sunset 1001 (orange): half a sun on the horizon, rows 1-6
+    elif c >= 1000                # sunrise 1000 (yellow), sunset 1001 (orange): the upper half of the clear sky sun
       var su = c == 1000 ? sun : self.ic(0xFF6A00)
-      pixel(x + 3, y + 1, su) pixel(x + 1, y + 2, su) pixel(x + 5, y + 2, su)          # rays
-      line(x + 2, y + 3, x + 4, y + 3, su) line(x + 1, y + 4, x + 5, y + 4, su) line(x, y + 5, x + 6, y + 5, su)
-      line(x, y + 6, x + 7, y + 6, self.ic(0x5A6E8C))
+      pixel(x + 3, y + 3, su)
+      pixel(x + 1, y + 4, su) pixel(x + 3, y + 4, su) pixel(x + 5, y + 4, su)
+      line(x + 2, y + 5, x + 4, y + 5, su)
+      line(x, y + 6, x + 6, y + 6, su)
     elif c == 0 || c == 1
       if isday
         circle_fill(x + 3, y + 3, 2, sun)
