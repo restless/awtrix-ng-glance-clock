@@ -48,10 +48,10 @@ script, so there is nothing to install.
 ## Installation
 
 In the AWTRIX NG web UI, open **Scripts**, create a new script named `Glance-Clock`, paste
-[`glance-clock.be`](glance-clock.be) and save. Or upload it over HTTP:
+[`glance-clock.ax`](glance-clock.ax) and save. Or upload it over HTTP:
 
 ```sh
-curl -X PUT --data-binary @glance-clock.be http://<clock-ip>/api/v1/apps/script/Glance-Clock
+curl -X PUT --data-binary @glance-clock.ax http://<clock-ip>/api/v1/apps/script/Glance-Clock
 ```
 
 Then open the app's settings (**Apps** → gear icon) and set your **latitude** and **longitude**
