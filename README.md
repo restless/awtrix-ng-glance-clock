@@ -2,59 +2,60 @@
 
 A small, tidy clock for [AWTRIX NG](https://github.com/Blueforcer/awtrix-ng) panels of 52×16 pixels
 and larger, such as the Ulanzi TC002. Instead of filling the panel with huge digits, it puts
-everything you want to see at a glance on one screen:
+everything you want to see at a glance on one screen: the time and date, the weather outside, and
+readings from your own sensors.
 
-![Glance Clock on a 52×16 panel](docs/screenshot.png)
+![Glance Clock: weather, time, a room temperature and the date, with the week bar](docs/default.png)
 
-| Top left | Top right |
-|---|---|
-| weather icon and outdoor temperature | time |
-| **Bottom left** | **Bottom right** |
-| a reading from MQTT, e.g. the room temperature | weekday and date |
+Each of the four corners shows what you pick, by day and by night. Weather comes from
+[Open-Meteo](https://open-meteo.com): free, no account, no API key. The icons are drawn by the
+script, so there is nothing to install.
 
-That is the default layout: each corner can show any element, so you can swap them around or
-leave one empty. An optional week bar on the bottom row lights today.
+## Examples
 
-Weather comes from [Open-Meteo](https://open-meteo.com): free, no account, no API key. The icons
-are drawn by the script, so there is nothing to install.
+| | |
+|:---:|:---:|
+| ![Night mode in green](docs/night.png) | ![A night layout with just the time and date](docs/night-minimal.png) |
+| Night mode with its own colours and brightness | A night layout that leaves two corners empty |
+| ![Humidity, feels-like, high/low today, tomorrow](docs/no-home-assistant.png) | ![Rain chance, wind, sunset, tomorrow](docs/more-corners.png) |
+| No Home Assistant needed: humidity, feels-like, today's high/low, tomorrow | Rain chance, wind, the next sunset, tomorrow |
+| ![Three MQTT readings and the time](docs/mqtt.png) | ![12-hour clock in °F with wind in mph](docs/us.png) |
+| MQTT readings: a room temperature, a humidity, a door contact | 12-hour clock, °F, mph, month names |
+| ![Polish weekday and month, seconds](docs/polish.png) | ![The weather icons](docs/icons.png) |
+| Polish names, a custom date, seconds | The icons: clear day and night, partly cloudy, cloudy, fog, rain, snow, thunderstorm, sunrise, sunset |
 
-![The icons: clear day and night, partly cloudy, cloudy, fog, rain, snow, thunderstorm, sunrise, sunset](docs/icons.png)
+<sub>Real frames from a Ulanzi TC002, enlarged.</sub>
 
 ## Features
 
-- Four corners, each showing whatever you pick: weather, time, date, an MQTT reading, the
-  outdoor humidity, the feels-like temperature, today's high/low, tomorrow's weather and high, the chance
-  of rain, the wind, the next sunrise or sunset, or nothing
-
-  ![Corners swapped](docs/layout-swapped.png) ![Without Home Assistant: humidity, feels-like, high/low, tomorrow](docs/no-ha.png)
-- Small time with a steady, blinking or pulsing colon, 24h or 12h with AM/PM; and the date; weekday names in English, Polish, German,
-  French or Ukrainian; date presets with dots, dashes or slashes, or a pattern of your own
-- Optional week bar: seven dashes on the bottom row with today lit
-- Outdoor temperature in °C or °F with a weather icon: clear (sun or moon), partly cloudy, cloudy, fog, rain,
-  snow and thunderstorm
-- Up to four readings from your MQTT broker: a plain value or one field of a JSON message (as sent by
-  Zigbee2MQTT, Tasmota or Shelly), with replacements such as `true=Closed`, decimals, a unit, a
+- **Four corners**, each showing the time, the date, the current weather, an MQTT reading, the
+  outdoor humidity, the feels-like temperature, today's high and low, tomorrow's weather, today's
+  chance of rain, the wind, the next sunrise or sunset, or nothing
+- **Day and night**: night mode on a schedule or always, with its own layout, colours and
+  brightness
+- **Time**: 24h or 12h with AM/PM, optional leading zero and seconds, a steady, blinking or pulsing
+  colon
+- **Date**: presets with dots, dashes, slashes or month names, or a pattern of your own; weekday and
+  month names in English, Polish, German, French and Ukrainian
+- **Week bar**: seven dashes on the bottom row with today lit
+- **Weather**: temperature in °C or °F, wind in km/h, m/s or mph, and `off` when the forecast is
+  out of date
+- **Up to four MQTT readings**: a plain value or one field of a JSON message (Zigbee2MQTT,
+  Tasmota, Shelly, Home Assistant), with replacements such as `true=Closed`, decimals, a unit, a
   short label, and `off` when the sensor goes quiet
-
-  ![MQTT readings: 25.7° and a door contact shown as D:Otw](docs/mqtt-readings.png)
-- Night mode, on a schedule or always on: its own colours for every element (the weather icon
-  included) and its own brightness
-
-  ![Night mode](docs/night.png)
-- Colours for every element
-- The layout is anchored to the panel's edges, so it spreads out on larger panels
+- **Larger panels**: the corners are anchored to the panel's edges and spread out
 
 ## Installation
 
-In the AWTRIX NG web UI, open **Scripts**, create a new script, paste
+In the AWTRIX NG web UI, open **Scripts**, create a new script named `Glance-Clock`, paste
 [`glance-clock.be`](glance-clock.be) and save. Or upload it over HTTP:
 
 ```sh
 curl -X PUT --data-binary @glance-clock.be http://<clock-ip>/api/v1/apps/script/Glance-Clock
 ```
 
-Then open the app's settings (**Apps** → gear icon) and set your **latitude** and **longitude**.
-The default is Berlin.
+Then open the app's settings (**Apps** → gear icon) and set your **latitude** and **longitude**
+under Weather. The default is Berlin.
 
 ## Settings
 
@@ -66,7 +67,7 @@ The settings page has these groups, in this order.
 | **Day:** Weather icons | on | |
 | **Day:** Brightness | 0 | 0 leaves the device brightness alone; otherwise set when night mode ends |
 | **Day:** colours | | time, date, weather (temperature, humidity, wind, rain, sun times), MQTT readings, week bar today and other days |
-| **Night:** Night mode | Off | Off, Scheduled (between From and Until) or Always |
+| **Night:** Night mode | Off | Off, Scheduled (from From until Until) or Always |
 | **Night:** From, Until | 22:00, 07:00 | the schedule; it may wrap past midnight |
 | **Night:** Top left … Bottom right | Same as day | a corner can show something else at night, or nothing |
 | **Night:** Weather icons | on | |
@@ -89,44 +90,36 @@ The settings page has these groups, in this order.
 | **Weather:** Weather refresh | 10 min | how often the weather is fetched |
 | **Weather:** Offline after | 120 min | without a fresh forecast for this long, weather elements show `off`; 0 never |
 | **MQTT reading 1–4:** Topic | empty | a topic on the broker set in AWTRIX's MQTT settings |
-| **MQTT reading 1–4:** JSON field | empty | empty for a plain value; `temperature` for `{"temperature":21.5}`; `a.b` for nested values |
+| **MQTT reading 1–4:** JSON field | empty | empty for a plain value; `temperature` for `{"temperature":21.5}`; `room.temp` for nested values |
 | **MQTT reading 1–4:** Replace values | empty | comma separated, case-insensitive: `true=Closed,false=Open`, `ON=On,OFF=Off` |
 | **MQTT reading 1–4:** Decimals | 0 | as sent, 0, 1 or 2 |
 | **MQTT reading 1–4:** Unit | ° | added after numbers, e.g. `°` or `%` |
 | **MQTT reading 1–4:** Label | empty | short text before the value, e.g. `In` |
 | **MQTT reading 1–4:** Offline after | 0 | minutes without a message before it shows `off`; 0 never |
 
-Brightness is a device-wide setting. With a day brightness of 0, the brightness the device had
-before night began is restored in the morning. If another app also has a night mode (such as
-Night Clock), switch one of them off, or both will set the brightness. Long custom date formats can
-run into the corner next to them; keep them short.
-
-Several readings may use the same topic, e.g. the temperature and the humidity fields of one
-Zigbee2MQTT sensor.
-
 ### What a corner can show
 
 | Option | Shows | Needs |
 |---|---|---|
-| Weather now | icon and outdoor temperature | internet |
-| Time | the time | |
 | Date | the date, as set under Date | |
-| MQTT reading 1–4 | that reading | an MQTT broker |
-| Humidity outdoors | outdoor relative humidity, e.g. `42%` | internet |
+| Empty | nothing | |
 | Feels like | feels-like temperature, e.g. `~10°` | internet |
 | High/low today | today's high and low, e.g. `14/5°` | internet |
-| Weather tomorrow | tomorrow's weather icon and high temperature | internet |
+| Humidity outdoors | outdoor relative humidity, e.g. `42%` | internet |
+| MQTT reading 1–4 | that reading | an MQTT broker |
 | Rain chance today | today's highest chance of rain, with a rain icon | internet |
+| Sunrise/sunset | the next sunrise (yellow half sun) or sunset (orange) | internet |
+| Time | the time | |
+| Weather now | icon and outdoor temperature | internet |
+| Weather tomorrow | tomorrow's weather icon and high temperature | internet |
 | Wind | current wind speed, e.g. `6km/h` | internet |
-| Sunrise/sunset | the next sunrise or sunset, arrow up or down | internet |
-| Empty | nothing | |
 
-![Rain chance, wind, sunset and tomorrow](docs/more-corners.png)
+Left corners start at the left edge and right corners end at the right edge. If a left corner is
+too wide, the right corner on the same row wins and the left one is cut off.
 
-Left corners start at the left edge, right corners end at the right edge. Keep the wider elements
-(time, date) apart from each other on one row, or they overlap.
+## MQTT readings
 
-### Readings straight from a device
+### Straight from a device
 
 Most devices publish JSON. A Zigbee2MQTT door sensor on `zigbee2mqtt/door` sends something like
 `{"contact":true,"battery":100}`, where `contact: true` means closed:
@@ -138,13 +131,13 @@ Most devices publish JSON. A Zigbee2MQTT door sensor on `zigbee2mqtt/door` sends
 | Replace values | `true=Closed,false=Open` |
 | Offline after | `120` |
 
-A message without the field, such as a battery-only update, leaves the shown value alone.
+A message without the field, such as a battery-only update, leaves the shown value alone. Several
+readings may use the same topic, e.g. the `temperature` and `humidity` fields of one sensor.
 
-### A reading from Home Assistant
+### From Home Assistant
 
-Publish the sensor to a topic, retained, and put that topic into the **MQTT topic** setting.
-Publishing on a schedule keeps the panel calm when the sensor reports often, and fills the value
-in within a minute after the script restarts:
+Publish the sensor to a topic, retained, and put that topic into the reading's **Topic** setting.
+Publishing on a schedule keeps the panel calm when the sensor reports often:
 
 ```yaml
 alias: "Room temperature to AWTRIX"
@@ -159,10 +152,24 @@ actions:
       retain: true
 ```
 
+The last value of each reading is kept across restarts, so saving the settings does not empty the
+corner.
+
+## Good to know
+
+- **Brightness is a device-wide setting.** Night mode remembers the brightness (and automatic
+  brightness, on clocks with a light sensor) and gives it back in the morning. If another app also
+  has a night mode, such as Night Clock, switch one of them off, or both will set the brightness.
+  Removing the app during the night leaves the night brightness in place.
+- **Sunrise and sunset** are given in the time zone of the coordinates you set, so set the place
+  where the clock is.
+- **Memory:** everything is in one script of about 34 KB of source. On clocks without PSRAM, remove
+  scripts you do not use if the clock reports that it is out of memory.
+
 ## Requirements
 
 - AWTRIX NG with scripting, on a panel of at least 52×16 pixels
-- Internet access for the weather; an MQTT broker only for the bottom-left reading
+- Internet access for the weather, an MQTT broker for the readings
 
 ## License
 

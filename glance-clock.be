@@ -1,7 +1,7 @@
 # @name    Glance Clock
 # @desc    Time, date, outdoor weather with an icon and an MQTT reading on one screen, small and tidy (52x16 and larger)
 # @author  restless
-# @version 0.8
+# @version 0.9
 # @display 52x16
 # @config  tl      select "Top left"                       default="Weather now" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Day"
 # @config  tr      select "Top right"                      default="Time" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Day"
