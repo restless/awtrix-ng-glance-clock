@@ -5,6 +5,10 @@
 # @display 52x16
 # @config  t12    select "Hour format"                    default=24h options=24h,12h group="Time"
 # @config  tlz    bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
+# @config  tl     select "Top left"                       default=weather options=weather,time,date,reading,none group="Layout"
+# @config  tr     select "Top right"                      default=time options=weather,time,date,reading,none group="Layout"
+# @config  bl     select "Bottom left"                    default=reading options=weather,time,date,reading,none group="Layout"
+# @config  br     select "Bottom right"                   default=date options=weather,time,date,reading,none group="Layout"
 # @config  tsep   select "Colon"                          default=steady options=steady,blink,pulse group="Time"
 # @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
 # @config  wday   bool   "Weekday in the date"            default=true group="Date"
@@ -43,6 +47,7 @@ class GlanceClock
   var ts, hh, mm, ds, out, reading, code, day
   var days
   var night, nfrom, nto, col
+  var slots
 
   def init()
     self.url = "https://api.open-meteo.com/v1/forecast?latitude=" + str(store.get("lat")) +
@@ -70,6 +75,7 @@ class GlanceClock
     self.nfrom = self.parse_hm(store.get("nfrom"))
     self.nto = self.parse_hm(store.get("nto"))
     self.use_colours(false)
+    self.slots = [store.get("tl"), store.get("tr"), store.get("bl"), store.get("br")]
   end
 
   # "22:00" -> minutes after midnight, nil if it does not read as a time
@@ -219,39 +225,40 @@ class GlanceClock
     rect_fill(x + 1, y + 4, 6, 3, col)
   end
 
-  def sun(x, y, r)
-    circle_fill(x, y, r, self.ic(0xFFD000))
-  end
-
-  def wicon()
-    var c = self.code
+  # the icon for WMO weather code c, its top left corner at (x, y)
+  def wicon(x, y, c, isday)
+    var sun = self.ic(0xFFD000)
+    var moon = self.ic(0xD0D0A0)
     if c < 0
       return
     elif c == 0 || c == 1
-      if self.day == 1
-        self.sun(3, 3, 2)
-        pixel(3, 0, self.ic(0xFFD000)) pixel(3, 6, self.ic(0xFFD000)) pixel(0, 3, self.ic(0xFFD000)) pixel(6, 3, self.ic(0xFFD000))
-        pixel(1, 1, self.ic(0xFFD000)) pixel(5, 1, self.ic(0xFFD000)) pixel(1, 5, self.ic(0xFFD000)) pixel(5, 5, self.ic(0xFFD000))
+      if isday
+        circle_fill(x + 3, y + 3, 2, sun)
+        pixel(x + 3, y, sun) pixel(x + 3, y + 6, sun) pixel(x, y + 3, sun) pixel(x + 6, y + 3, sun)
+        pixel(x + 1, y + 1, sun) pixel(x + 5, y + 1, sun) pixel(x + 1, y + 5, sun) pixel(x + 5, y + 5, sun)
       else
-        circle_fill(3, 3, 3, self.ic(0xD0D0A0))
-        circle_fill(5, 2, 3, 0x000000)
+        circle_fill(x + 3, y + 3, 3, moon)
+        circle_fill(x + 5, y + 2, 3, 0x000000)
       end
     elif c == 2
-      if self.day == 1 self.sun(5, 2, 2) else circle_fill(5, 2, 2, self.ic(0xD0D0A0)) end
-      self.cloud(0, 1, self.ic(0xC0C0C0))
+      circle_fill(x + 5, y + 2, 2, isday ? sun : moon)
+      self.cloud(x, y + 1, self.ic(0xC0C0C0))
     elif c == 3
-      self.cloud(0, 0, self.ic(0x909090))
+      self.cloud(x, y, self.ic(0x909090))
     elif c == 45 || c == 48
-      line(0, 2, 7, 2, self.ic(0x808080)) line(1, 4, 6, 4, self.ic(0x808080)) line(0, 6, 7, 6, self.ic(0x808080))
+      var f = self.ic(0x808080)
+      line(x, y + 2, x + 7, y + 2, f) line(x + 1, y + 4, x + 6, y + 4, f) line(x, y + 6, x + 7, y + 6, f)
     elif c >= 71 && c <= 77 || c == 85 || c == 86
-      self.cloud(0, -1, self.ic(0xA0A0A0))
-      pixel(1, 7, self.ic(0xFFFFFF)) pixel(4, 6, self.ic(0xFFFFFF)) pixel(6, 7, self.ic(0xFFFFFF))
+      var w = self.ic(0xFFFFFF)
+      self.cloud(x, y - 1, self.ic(0xA0A0A0))
+      pixel(x + 1, y + 7, w) pixel(x + 4, y + 6, w) pixel(x + 6, y + 7, w)
     elif c >= 95
-      self.cloud(0, -1, self.ic(0x707070))
-      line(4, 5, 3, 6, self.ic(0xFFD000)) line(3, 6, 5, 6, self.ic(0xFFD000)) pixel(4, 7, self.ic(0xFFD000))
+      self.cloud(x, y - 1, self.ic(0x707070))
+      line(x + 4, y + 5, x + 3, y + 6, sun) line(x + 3, y + 6, x + 5, y + 6, sun) pixel(x + 4, y + 7, sun)
     else                          # drizzle and rain: 51-67, 80-82
-      self.cloud(0, -1, self.ic(0x8090A0))
-      pixel(1, 6, self.ic(0x3080FF)) pixel(4, 7, self.ic(0x3080FF)) pixel(6, 6, self.ic(0x3080FF)) pixel(2, 7, self.ic(0x3080FF))
+      var d = self.ic(0x3080FF)
+      self.cloud(x, y - 1, self.ic(0x8090A0))
+      pixel(x + 1, y + 6, d) pixel(x + 4, y + 7, d) pixel(x + 6, y + 6, d) pixel(x + 2, y + 7, d)
     end
   end
 
@@ -284,16 +291,30 @@ class GlanceClock
     text(x, y, self.mm, c)
   end
 
+  # one corner: slot 0 top left, 1 top right, 2 bottom left, 3 bottom right.
+  # Left corners start at the left edge, right corners end at the right edge.
+  def draw_slot(i, w)
+    var what = self.slots[i]
+    var right = i == 1 || i == 3
+    var y = i < 2 ? 6 : 14
+    if what == "time"
+      self.draw_time(right ? w - text_ink_width(self.ts) - 1 : 1, y, self.col[0])
+    elif what == "date"
+      text(right ? w - text_ink_width(self.ds) - 1 : 1, y, self.ds, self.col[1])
+    elif what == "reading"
+      if self.reading != nil text(right ? w - text_ink_width(self.reading) - 1 : 1, y, self.reading, self.col[3]) end
+    elif what == "weather"
+      var tw = self.out != nil ? text_ink_width(self.out) : 0
+      var x = right ? w - tw - 11 : 0
+      if !self.night || store.get("nicon") self.wicon(x, y - 6, self.code, self.day == 1) end
+      if self.out != nil text(x + 10, y, self.out, self.col[2]) end
+    end
+  end
+
   def draw()
     clear()
     var w = width()
-    # right column: time on top, date below, both right-aligned
-    self.draw_time(w - text_ink_width(self.ts) - 1, 6, self.col[0])
-    text(w - text_ink_width(self.ds) - 1, 14, self.ds, self.col[1])
-    # left column: weather icon + outdoor temperature, the MQTT reading below
-    if !self.night || store.get("nicon") self.wicon() end
-    if self.out != nil text(10, 6, self.out, self.col[2]) end
-    if self.reading != nil text(1, 14, self.reading, self.col[3]) end
+    for i : 0..3 self.draw_slot(i, w) end
     if store.get("wbar") self.week_bar(w) end
   end
 end
