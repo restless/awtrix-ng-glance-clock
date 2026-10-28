@@ -56,7 +56,7 @@ The default is Berlin.
 
 | Setting | Default | |
 |---|---|---|
-| Top left, Top right, Bottom left, Bottom right | weather, time, reading, date | what each corner shows; see below |
+| Top left, Top right, Bottom left, Bottom right | Weather now, Time, MQTT reading, Date | what each corner shows; see below |
 | Hour format | 24h | 24h or 12h |
 | AM/PM | on | 12h only |
 | Leading zero | on | 08:05 rather than 8:05 |
@@ -90,15 +90,15 @@ on the left; keep them short.
 
 | Option | Shows | Needs |
 |---|---|---|
-| `weather` | icon and outdoor temperature | internet |
-| `time` | the time | |
-| `date` | the date, as set under Date | |
-| `reading` | the MQTT reading | an MQTT broker |
-| `humidity` | outdoor relative humidity, e.g. `42%` | internet |
-| `feels` | feels-like temperature, e.g. `~10°` | internet |
-| `hilo` | today's high and low, e.g. `14/5°` | internet |
-| `tomorrow` | tomorrow's icon and high | internet |
-| `none` | nothing | |
+| Weather now | icon and outdoor temperature | internet |
+| Time | the time | |
+| Date | the date, as set under Date | |
+| MQTT reading | the MQTT reading | an MQTT broker |
+| Humidity outdoors | outdoor relative humidity, e.g. `42%` | internet |
+| Feels like | feels-like temperature, e.g. `~10°` | internet |
+| High/low today | today's high and low, e.g. `14/5°` | internet |
+| Tomorrow | tomorrow's icon and high | internet |
+| Empty | nothing | |
 
 Left corners start at the left edge, right corners end at the right edge. Keep the wider elements
 (time, date) apart from each other on one row, or they overlap.

@@ -6,10 +6,10 @@
 # @config  t12    select "Hour format"                    default=24h options=24h,12h group="Time"
 # @config  ampm   bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
 # @config  tlz    bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
-# @config  tl     select "Top left"                       default=weather options=weather,time,date,reading,humidity,feels,hilo,tomorrow,none group="Layout"
-# @config  tr     select "Top right"                      default=time options=weather,time,date,reading,humidity,feels,hilo,tomorrow,none group="Layout"
-# @config  bl     select "Bottom left"                    default=reading options=weather,time,date,reading,humidity,feels,hilo,tomorrow,none group="Layout"
-# @config  br     select "Bottom right"                   default=date options=weather,time,date,reading,humidity,feels,hilo,tomorrow,none group="Layout"
+# @config  tl     select "Top left"                       default="Weather now" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Empty" group="Layout"
+# @config  tr     select "Top right"                      default="Time" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Empty" group="Layout"
+# @config  bl     select "Bottom left"                    default="MQTT reading" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Empty" group="Layout"
+# @config  br     select "Bottom right"                   default="Date" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Empty" group="Layout"
 # @config  tsep   select "Colon"                          default=steady options=steady,blink,pulse group="Time"
 # @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
 # @config  wday   bool   "Weekday in the date"            default=true group="Date"
@@ -80,7 +80,17 @@ class GlanceClock
     self.nfrom = self.parse_hm(store.get("nfrom"))
     self.nto = self.parse_hm(store.get("nto"))
     self.use_colours(false)
-    self.slots = [store.get("tl"), store.get("tr"), store.get("bl"), store.get("br")]
+    # the labels picked in the web UI, and the short names stored by 0.4
+    var ids = {
+      "Weather now": "weather", "Time": "time", "Date": "date", "MQTT reading": "reading",
+      "Humidity outdoors": "humidity", "Feels like": "feels", "High/low today": "hilo",
+      "Tomorrow": "tomorrow", "Empty": "none"
+    }
+    self.slots = []
+    for k : ["tl", "tr", "bl", "br"]
+      var v = store.get(k)
+      self.slots.push(ids.find(v, v))
+    end
   end
 
   # "22:00" -> minutes after midnight, nil if it does not read as a time
