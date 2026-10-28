@@ -10,7 +10,7 @@ everything you want to see at a glance on one screen:
 |---|---|
 | weather icon and outdoor temperature | time |
 | **Bottom left** | **Bottom right** |
-| any reading from MQTT, e.g. the room temperature | weekday and date |
+| a reading from MQTT, e.g. the room temperature | weekday and date |
 
 That is the default layout: each corner can show any element, so you can swap them around or
 leave one empty. An optional week bar on the bottom row lights today.
@@ -32,10 +32,11 @@ are drawn by the script, so there is nothing to install.
 - Optional week bar: seven dashes on the bottom row with today lit
 - Outdoor temperature in °C or °F with a weather icon: clear (sun or moon), partly cloudy, cloudy, fog, rain,
   snow and thunderstorm
-- Any value from your MQTT broker on the bottom left with a unit of your choice: a room
-  temperature, the humidity, or text such as `Open` from a door sensor
+- Two readings from your MQTT broker: a plain value or one field of a JSON message (as sent by
+  Zigbee2MQTT, Tasmota or Shelly), with replacements such as `true=Closed`, decimals, a unit, a
+  short label, and `off` when the sensor goes quiet
 
-  ![A text reading](docs/reading-text.png)
+  ![MQTT readings: 25.7° and a door contact shown as D:Otw](docs/mqtt-readings.png)
 - Night mode, on a schedule or always on: its own colours for every element (the weather icon
   included) and its own brightness
 
@@ -64,19 +65,23 @@ The default is Berlin.
 | AM/PM | on | 12h only |
 | Leading zero | on | 08:05 rather than 8:05 |
 | Colon | steady | steady, blink or pulse |
-| Language | English | the weekday names: English, Polski, Deutsch, Français, Українська |
+| Language | English | weekday and month names: English, Polski, Deutsch, Français, Українська |
 | Weekday in the date | on | |
-| Date format | dd.mm | dd.mm, dd.mm.yy, dd-mm, dd-mm-yy, mm/dd, mm/dd/yy, yyyy-mm-dd or custom |
-| Custom date format | d.mm.yy | used when Date format is custom: `dd` `d` `mm` `m` `yyyy` `yy` `ww` (weekday); anything else is shown as typed, e.g. `ww d·m` |
+| Date format | dd.mm | dd.mm, dd.mm.yy, dd-mm, dd-mm-yy, mm/dd, mm/dd/yy, yyyy-mm-dd, mon dd (`OCT 28`), dd mon or custom |
+| Custom date format | d.mm.yy | used when Date format is custom: `dd` `d` `mm` `m` `mon` (month name) `yyyy` `yy` `ww` (weekday); anything else is shown as typed, e.g. `ww d·m` |
 | Week bar | off | seven dashes on the bottom row, today lit |
 | Week starts on Monday | on | |
 | Latitude, Longitude | Berlin | the place whose weather is shown |
 | Temperature unit | C | C or F |
 | Wind unit | km/h | km/h, m/s or mph |
 | Weather refresh | 10 min | how often the weather is fetched |
-| MQTT topic | empty | for a corner set to MQTT reading: a topic on the broker set in AWTRIX's MQTT settings |
-| Unit | ° | added after the value, e.g. `°` or `%`; empty for text |
-| Round numbers | on | numbers are rounded; text is shown as it is |
+| **MQTT reading 1, 2:** Topic | empty | a topic on the broker set in AWTRIX's MQTT settings |
+| **MQTT reading 1, 2:** JSON field | empty | empty for a plain value; `temperature` for `{"temperature":21.5}`; `a.b` for nested values |
+| **MQTT reading 1, 2:** Replace values | empty | comma separated, case-insensitive: `true=Closed,false=Open`, `ON=On,OFF=Off` |
+| **MQTT reading 1, 2:** Decimals | 0 | as sent, 0, 1 or 2 |
+| **MQTT reading 1, 2:** Unit | ° | added after numbers, e.g. `°` or `%` |
+| **MQTT reading 1, 2:** Label | empty | short text before the value, e.g. `In` |
+| **MQTT reading 1, 2:** Offline after | 0 | minutes without a message before it shows `off`; 0 never |
 | **Day:** Brightness | 0 | 0 leaves the device brightness alone; otherwise set when night mode ends |
 | **Day:** colours | | time, date, weather (temperature, humidity, wind, rain, sun times), MQTT reading, week bar today and other days |
 | **Night:** Night mode | off | off, schedule or on |
@@ -96,7 +101,7 @@ on the left; keep them short.
 | Weather now | icon and outdoor temperature | internet |
 | Time | the time | |
 | Date | the date, as set under Date | |
-| MQTT reading | the MQTT reading | an MQTT broker |
+| MQTT reading 1, MQTT reading 2 | that reading | an MQTT broker |
 | Humidity outdoors | outdoor relative humidity, e.g. `42%` | internet |
 | Feels like | feels-like temperature, e.g. `~10°` | internet |
 | High/low today | today's high and low, e.g. `14/5°` | internet |
@@ -110,6 +115,20 @@ on the left; keep them short.
 
 Left corners start at the left edge, right corners end at the right edge. Keep the wider elements
 (time, date) apart from each other on one row, or they overlap.
+
+### Readings straight from a device
+
+Most devices publish JSON. A Zigbee2MQTT door sensor on `zigbee2mqtt/door` sends something like
+`{"contact":true,"battery":100}`, where `contact: true` means closed:
+
+| Setting | Value |
+|---|---|
+| Topic | `zigbee2mqtt/door` |
+| JSON field | `contact` |
+| Replace values | `true=Closed,false=Open` |
+| Offline after | `120` |
+
+A message without the field, such as a battery-only update, leaves the shown value alone.
 
 ### A reading from Home Assistant
 
