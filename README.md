@@ -23,7 +23,7 @@ are drawn by the script, so there is nothing to install.
 ## Features
 
 - Four corners, each showing whatever you pick: weather, time, date, an MQTT reading, the
-  outdoor humidity, the feels-like temperature, today's high/low, tomorrow's weather, the chance
+  outdoor humidity, the feels-like temperature, today's high/low, tomorrow's weather and high, the chance
   of rain, the wind, the next sunrise or sunset, or nothing
 
   ![Corners swapped](docs/layout-swapped.png) ![Without Home Assistant: humidity, feels-like, high/low, tomorrow](docs/no-ha.png)
@@ -100,7 +100,7 @@ on the left; keep them short.
 | Humidity outdoors | outdoor relative humidity, e.g. `42%` | internet |
 | Feels like | feels-like temperature, e.g. `~10°` | internet |
 | High/low today | today's high and low, e.g. `14/5°` | internet |
-| Tomorrow | tomorrow's icon and high | internet |
+| Weather tomorrow | tomorrow's weather icon and high temperature | internet |
 | Rain chance today | today's highest chance of rain, with a rain icon | internet |
 | Wind | current wind speed, e.g. `6km/h` | internet |
 | Sunrise/sunset | the next sunrise or sunset, arrow up or down | internet |
