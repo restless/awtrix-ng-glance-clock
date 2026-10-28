@@ -18,7 +18,7 @@ script, so there is nothing to install.
 | | |
 |:---:|:---:|
 | ![Night mode with its own colours](docs/night.png) | ![A night layout with just the time and date](docs/night-minimal.png) |
-| Night mode with its own colours and brightness | A night layout that leaves two corners empty |
+| Night mode with its own colours and brightness, and the next sunrise | A night layout that leaves two corners empty |
 | ![Humidity, feels-like, high/low today, tomorrow](docs/no-home-assistant.png) | ![Rain chance, wind, sunset, tomorrow](docs/more-corners.png) |
 | No Home Assistant needed: humidity, feels-like, today's high/low, tomorrow | Rain chance, wind, the next sunset, tomorrow |
 | ![Three MQTT readings and the time](docs/mqtt.png) | ![12-hour clock in °F with wind in mph](docs/us.png) |
