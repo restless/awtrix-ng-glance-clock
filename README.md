@@ -12,14 +12,19 @@ everything you want to see at a glance on one screen:
 | **Bottom left** | **Bottom right** |
 | any reading from MQTT, e.g. the room temperature | weekday and date |
 
-An optional week bar on the bottom row lights today.
+That is the default layout: each corner can show any element, so you can swap them around or
+leave one empty. An optional week bar on the bottom row lights today.
 
 Weather comes from [Open-Meteo](https://open-meteo.com): free, no account, no API key. The icons
 are drawn by the script, so there is nothing to install.
 
 ## Features
 
-- Small time and date, aligned to the right edge; weekday names in English, Polish, German,
+- Four corners, each showing whatever you pick: weather, time, date, an MQTT reading, the
+  outdoor humidity, the feels-like temperature, today's high/low, tomorrow's weather, or nothing
+
+  ![Corners swapped](docs/layout-swapped.png) ![Without Home Assistant: humidity, feels-like, high/low, tomorrow](docs/no-ha.png)
+- Small time with a steady, blinking or pulsing colon, 24h or 12h with AM/PM; and the date; weekday names in English, Polish, German,
   French or Ukrainian; date presets with dots, dashes or slashes, or a pattern of your own
 - Optional week bar: seven dashes on the bottom row with today lit
 - Outdoor temperature in °C or °F with a weather icon: clear (sun or moon), partly cloudy, cloudy, fog, rain,
@@ -51,6 +56,11 @@ The default is Berlin.
 
 | Setting | Default | |
 |---|---|---|
+| Top left, Top right, Bottom left, Bottom right | weather, time, reading, date | what each corner shows; see below |
+| Hour format | 24h | 24h or 12h |
+| AM/PM | on | 12h only |
+| Leading zero | on | 08:05 rather than 8:05 |
+| Colon | steady | steady, blink or pulse |
 | Language | English | the weekday names: English, Polski, Deutsch, Français, Українська |
 | Weekday in the date | on | |
 | Date format | dd.mm | dd.mm, dd.mm.yy, dd-mm, dd-mm-yy, mm/dd, mm/dd/yy, yyyy-mm-dd or custom |
@@ -75,6 +85,23 @@ The default is Berlin.
 Brightness is a device-wide setting. With a day brightness of 0, the brightness the device had
 before night began is restored in the morning. Long custom date formats can run into the reading
 on the left; keep them short.
+
+### What a corner can show
+
+| Option | Shows | Needs |
+|---|---|---|
+| `weather` | icon and outdoor temperature | internet |
+| `time` | the time | |
+| `date` | the date, as set under Date | |
+| `reading` | the MQTT reading | an MQTT broker |
+| `humidity` | outdoor relative humidity, e.g. `42%` | internet |
+| `feels` | feels-like temperature, e.g. `~10°` | internet |
+| `hilo` | today's high and low, e.g. `14/5°` | internet |
+| `tomorrow` | tomorrow's icon and high | internet |
+| `none` | nothing | |
+
+Left corners start at the left edge, right corners end at the right edge. Keep the wider elements
+(time, date) apart from each other on one row, or they overlap.
 
 ### A reading from Home Assistant
 
