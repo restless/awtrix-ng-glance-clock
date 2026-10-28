@@ -22,6 +22,7 @@
 # @config  unit    select "Temperature unit"               default=C options=C,F group="Weather"
 # @config  wunit   select "Wind unit"                      default=km/h options=km/h,m/s,mph group="Weather"
 # @config  wref    number "Weather refresh"                default=10 min=5 max=60 unit=min group="Weather"
+# @config  wstale  number "Offline after"                  default=120 min=0 max=1440 unit=min help="Minutes without fresh weather, then it shows off · 0 = never" group="Weather"
 # @config  rtopic  text   "Topic"                          default="" help="e.g. zigbee2mqtt/door, or a topic Home Assistant publishes to" group="MQTT reading 1"
 # @config  rjson   text   "JSON field"                     default="" help="Empty: plain value · {'temp': 21.5} → temp · nested: room.temp" group="MQTT reading 1"
 # @config  rmap    text   "Replace values"                 default="" help="value=text pairs, comma separated · e.g. true=Closed,false=Open · ON=On,OFF=Off" group="MQTT reading 1"
@@ -77,7 +78,7 @@ import json
 import string
 
 class GlanceClock
-  var url, ticks, busy
+  var url, ticks, busy, wxok
   var ts, hh, mm, ap, ds, out, code, day
   var rk, rv, rlast, rmaps
   var hum, feels, hilo, tmax, tcode, rain, wind
@@ -94,6 +95,7 @@ class GlanceClock
                (store.get("unit") == "F" ? "&temperature_unit=fahrenheit" : "")
     self.ticks = 0
     self.busy = false
+    self.wxok = now_ms()
     self.ts = "--:--"
     self.hh = "--"
     self.mm = "--"
@@ -277,6 +279,11 @@ class GlanceClock
     self.rv[i] = store.get(k[5]) + out
   end
 
+  def weather_stale()
+    var st = int(store.get("wstale"))
+    return st > 0 && now_ms() - self.wxok > st * 60000
+  end
+
   def reading_text(i)
     var st = int(store.get(self.rk[i][6]))
     if st > 0 && now_ms() - self.rlast[i] > st * 60000 return store.get(self.rk[i][5]) + "off" end
@@ -370,6 +377,7 @@ class GlanceClock
       return
     end
     var t = re.search("temperature_2m\":(-?[0-9.]+)", b)
+    if t != nil self.wxok = now_ms() end
     var c = re.search("weather_code\":([0-9]+)", b)
     var d = re.search("is_day\":([01])", b)
     var h = re.search("relative_humidity_2m\":([0-9.]+)", b)
@@ -526,6 +534,9 @@ class GlanceClock
     elif what == "rain"         t = self.rain  icon = self.rain != nil ? 61 : -1
     elif what == "wind"         t = self.wind
     elif what == "sun"          t = self.suntxt  icon = self.sunicon
+    end
+    if k == 2 && what != "none" && self.weather_stale()                  # every weather element when the forecast is old
+      t = "off"  icon = -1
     end
     if self.night && !store.get("nicon") icon = -1 end
     var tw = t != nil ? text_ink_width(t) : 0
