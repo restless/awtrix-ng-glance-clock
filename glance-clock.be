@@ -5,7 +5,8 @@
 # @display 52x16
 # @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
 # @config  wday   bool   "Weekday in the date"            default=true group="Date"
-# @config  dfmt   select "Date format"                    default=dd.mm options=dd.mm,dd.mm.yy,mm/dd,mm/dd/yy group="Date"
+# @config  dfmt   select "Date format"                    default=dd.mm options=dd.mm,dd.mm.yy,dd-mm,dd-mm-yy,mm/dd,mm/dd/yy,yyyy-mm-dd,custom group="Date"
+# @config  dcust  text   "Custom date format"             default="d.mm.yy" maxlen=24 help="For Date format custom: dd d mm m yyyy yy ww (weekday), anything else as typed" group="Date"
 # @config  wbar   bool   "Week bar"                       default=false help="Seven dashes on the bottom row, today lit" group="Week bar"
 # @config  wmon   bool   "Week starts on Monday"          default=true group="Week bar"
 # @config  wtd    color  "Today"                          default=#FFFFFF group="Week bar"
@@ -150,20 +151,31 @@ class GlanceClock
   end
 
   def date_text()
-    var d = day()
-    var dd = (d < 10 ? "0" : "") + str(d)
-    var mo = month()
-    var mm = (mo < 10 ? "0" : "") + str(mo)
-    var y = year() % 100
-    var yy = (y < 10 ? "0" : "") + str(y)
     var f = store.get("dfmt")
-    var s
-    if f == "dd.mm.yy"     s = dd + "." + mm + "." + yy
-    elif f == "mm/dd"      s = mm + "/" + dd
-    elif f == "mm/dd/yy"   s = mm + "/" + dd + "/" + yy
-    else                   s = dd + "." + mm
-    end
+    var s = self.fmt_date(f == "custom" ? store.get("dcust") : f)
     return store.get("wday") ? self.days[weekday()] + " " + s : s
+  end
+
+  # turns a pattern such as dd.mm.yy into a date; longest token first, the rest as typed
+  def fmt_date(p)
+    var d = day()
+    var mo = month()
+    var y = year()
+    var out = ""
+    var i = 0
+    while i < size(p)
+      var t = p[i..i + 3]
+      if t == "yyyy"                out += str(y)  i += 4
+      elif t[0..1] == "yy"          out += (y % 100 < 10 ? "0" : "") + str(y % 100)  i += 2
+      elif t[0..1] == "dd"          out += (d < 10 ? "0" : "") + str(d)  i += 2
+      elif t[0..1] == "mm"          out += (mo < 10 ? "0" : "") + str(mo)  i += 2
+      elif t[0..1] == "ww"          out += self.days[weekday()]  i += 2
+      elif t[0] == "d"              out += str(d)  i += 1
+      elif t[0] == "m"              out += str(mo)  i += 1
+      else                          out += p[i]  i += 1
+      end
+    end
+    return out
   end
 
   def on_wx(b, st)
