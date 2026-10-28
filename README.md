@@ -17,7 +17,7 @@ script, so there is nothing to install.
 
 | | |
 |:---:|:---:|
-| ![Night mode in green](docs/night.png) | ![A night layout with just the time and date](docs/night-minimal.png) |
+| ![Night mode with its own colours](docs/night.png) | ![A night layout with just the time and date](docs/night-minimal.png) |
 | Night mode with its own colours and brightness | A night layout that leaves two corners empty |
 | ![Humidity, feels-like, high/low today, tomorrow](docs/no-home-assistant.png) | ![Rain chance, wind, sunset, tomorrow](docs/more-corners.png) |
 | No Home Assistant needed: humidity, feels-like, today's high/low, tomorrow | Rain chance, wind, the next sunset, tomorrow |
@@ -78,7 +78,7 @@ The settings page has these groups, in this order.
 | **Night:** Weather icons | on | |
 | **Night:** Brightness | 8 | 0 leaves the device brightness alone |
 | **Night:** Colon | steady | steady, blink or pulse; at low brightness a dimmed colour changes hue, so pulsing looks off |
-| **Night:** colours | greens | the same list as Day |
+| **Night:** colours | green time, dim red | the same list as Day; colours of one channel (pure red, green or blue) keep their hue at low brightness |
 | **Time:** Hour format | 24h | 24h or 12h |
 | **Time:** AM/PM | on | 12h only |
 | **Time:** Leading zero | on | 08:05 rather than 8:05 |
