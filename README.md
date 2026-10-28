@@ -55,7 +55,7 @@ curl -X PUT --data-binary @glance-clock.be http://<clock-ip>/api/v1/apps/script/
 ```
 
 Then open the app's settings (**Apps** → gear icon) and set your **latitude** and **longitude**
-under Weather. The default is Berlin.
+under Weather. The default is Bielsko-Biała, Poland.
 
 ## Settings
 
@@ -84,7 +84,7 @@ The settings page has these groups, in this order.
 | **Date:** Custom date format | d.mm.yy | `dd` `d` `mm` `m` `mon` (month name) `yyyy` `yy` `ww` (weekday); text in single quotes and anything else is shown as typed, e.g. `ww d·m` or `'Day' d` |
 | **Week bar:** Week bar | off | seven dashes on the bottom row, today lit |
 | **Week bar:** Week starts on Monday | on | |
-| **Weather:** Latitude, Longitude | Berlin | the place whose weather is shown |
+| **Weather:** Latitude, Longitude | Bielsko-Biała | the place whose weather is shown |
 | **Weather:** Temperature unit | C | C or F |
 | **Weather:** Wind unit | km/h | km/h, m/s or mph |
 | **Weather:** Weather refresh | 10 min | how often the weather is fetched |
