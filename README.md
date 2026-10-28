@@ -58,23 +58,34 @@ The default is Berlin.
 
 ## Settings
 
+The settings page has these groups, in this order.
+
 | Setting | Default | |
 |---|---|---|
-| Top left, Top right, Bottom left, Bottom right | Weather now, Time, MQTT reading, Date | what each corner shows; see below |
-| Hour format | 24h | 24h or 12h |
-| AM/PM | on | 12h only |
-| Leading zero | on | 08:05 rather than 8:05 |
-| Colon | steady | steady, blink or pulse |
-| Language | English | weekday and month names: English, Polski, Deutsch, Français, Українська |
-| Weekday in the date | on | for the presets; a custom format places the weekday itself with `ww` |
-| Date format | dd.mm | dd.mm, dd.mm.yy, dd-mm, dd-mm-yy, mm/dd, mm/dd/yy, yyyy-mm-dd, mon dd (`OCT 28`), dd mon or custom |
-| Custom date format | d.mm.yy | used when Date format is custom: `dd` `d` `mm` `m` `mon` (month name) `yyyy` `yy` `ww` (weekday); anything else is shown as typed, e.g. `ww d·m` |
-| Week bar | off | seven dashes on the bottom row, today lit |
-| Week starts on Monday | on | |
-| Latitude, Longitude | Berlin | the place whose weather is shown |
-| Temperature unit | C | C or F |
-| Wind unit | km/h | km/h, m/s or mph |
-| Weather refresh | 10 min | how often the weather is fetched |
+| **Day:** Top left, Top right, Bottom left, Bottom right | Weather now, Time, MQTT reading 1, Date | what each corner shows; see below |
+| **Day:** Brightness | 0 | 0 leaves the device brightness alone; otherwise set when night mode ends |
+| **Day:** colours | | time, date, weather (temperature, humidity, wind, rain, sun times), MQTT readings, week bar today and other days |
+| **Night:** Night mode | Off | Off, Scheduled (between From and Until) or Always |
+| **Night:** From, Until | 22:00, 07:00 | the schedule; it may wrap past midnight |
+| **Night:** Top left … Bottom right | Same as day | a corner can show something else at night, or nothing |
+| **Night:** Weather icons | on | |
+| **Night:** Brightness | 8 | 0 leaves the device brightness alone |
+| **Night:** colours | greens | the same list as Day |
+| **Time:** Hour format | 24h | 24h or 12h |
+| **Time:** AM/PM | on | 12h only |
+| **Time:** Leading zero | on | 08:05 rather than 8:05 |
+| **Time:** Colon | steady | steady, blink or pulse |
+| **Date:** Language | English | weekday and month names: English, Polski, Deutsch, Français, Українська |
+| **Date:** Weekday in the date | on | for the presets; a custom format places the weekday itself with `ww` |
+| **Date:** Date format | dd.mm | dd.mm, dd.mm.yy, dd-mm, dd-mm-yy, mm/dd, mm/dd/yy, yyyy-mm-dd, mon dd (`OCT 28`), dd mon or custom |
+| **Date:** Custom date format | d.mm.yy | `dd` `d` `mm` `m` `mon` (month name) `yyyy` `yy` `ww` (weekday); anything else is shown as typed, e.g. `ww d·m` |
+| **Week bar:** Week bar | off | seven dashes on the bottom row, today lit |
+| **Week bar:** Week starts on Monday | on | |
+| **Weather:** Latitude, Longitude | Berlin | the place whose weather is shown |
+| **Weather:** Temperature unit | C | C or F |
+| **Weather:** Wind unit | km/h | km/h, m/s or mph |
+| **Weather:** Weather refresh | 10 min | how often the weather is fetched |
+| **Weather:** Offline after | 120 min | without a fresh forecast for this long, weather elements show `off`; 0 never |
 | **MQTT reading 1–4:** Topic | empty | a topic on the broker set in AWTRIX's MQTT settings |
 | **MQTT reading 1–4:** JSON field | empty | empty for a plain value; `temperature` for `{"temperature":21.5}`; `a.b` for nested values |
 | **MQTT reading 1–4:** Replace values | empty | comma separated, case-insensitive: `true=Closed,false=Open`, `ON=On,OFF=Off` |
@@ -82,17 +93,14 @@ The default is Berlin.
 | **MQTT reading 1–4:** Unit | ° | added after numbers, e.g. `°` or `%` |
 | **MQTT reading 1–4:** Label | empty | short text before the value, e.g. `In` |
 | **MQTT reading 1–4:** Offline after | 0 | minutes without a message before it shows `off`; 0 never |
-| **Day:** Brightness | 0 | 0 leaves the device brightness alone; otherwise set when night mode ends |
-| **Day:** colours | | time, date, weather (temperature, humidity, wind, rain, sun times), MQTT reading, week bar today and other days |
-| **Night:** Night mode | Off | Off, Scheduled (between From and Until) or Always |
-| **Night:** From, Until | 22:00, 07:00 | the schedule; it may wrap past midnight |
-| **Night:** Weather icons | on | |
-| **Night:** Brightness | 8 | 0 leaves the device brightness alone |
-| **Night:** colours | greens | the same list as Day |
 
 Brightness is a device-wide setting. With a day brightness of 0, the brightness the device had
-before night began is restored in the morning. Long custom date formats can run into the reading
-on the left; keep them short.
+before night began is restored in the morning. If another app also has a night mode (such as
+Night Clock), switch one of them off, or both will set the brightness. Long custom date formats can
+run into the corner next to them; keep them short.
+
+Several readings may use the same topic, e.g. the temperature and the humidity fields of one
+Zigbee2MQTT sensor.
 
 ### What a corner can show
 
