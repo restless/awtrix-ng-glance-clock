@@ -14,15 +14,17 @@
 # @config  lon    number "Longitude"                      default=13.405 min=-180 max=180 step=0.0001 group="Weather"
 # @config  unit   select "Temperature unit"               default=C options=C,F group="Weather"
 # @config  wref   number "Weather refresh"                default=10 min=5 max=60 unit=min group="Weather"
-# @config  rtopic text   "Room temperature (MQTT topic)"  default="" help="Empty hides it" group="Room"
+# @config  rtopic text   "MQTT topic"                     default="" help="Shown at the bottom left; empty hides it" group="Reading"
+# @config  runit  text   "Unit"                           default="°" maxlen=4 help="Added after the value, e.g. ° or %" group="Reading"
+# @config  rround bool   "Round numbers"                  default=true help="Text such as Open stays as it is" group="Reading"
 # @config  tcol   color  "Time colour"                    default=#FFFFFF group="Colours"
 # @config  dcol   color  "Date colour"                    default=#8888AA group="Colours"
 # @config  ocol   color  "Outdoor temperature colour"     default=#FFB040 group="Colours"
-# @config  rcol   color  "Room temperature colour"        default=#40C0FF group="Colours"
+# @config  rcol   color  "Reading colour"                 default=#40C0FF group="Colours"
 
 class GlanceClock
   var url, ticks, busy
-  var ts, ds, out, room, code, day
+  var ts, ds, out, reading, code, day
   var days
 
   def init()
@@ -34,7 +36,7 @@ class GlanceClock
     self.ts = "--:--"
     self.ds = ""
     self.out = nil
-    self.room = nil
+    self.reading = nil
     self.code = -1
     self.day = 1
     var names = {
@@ -49,12 +51,14 @@ class GlanceClock
 
   def setup()
     var t = store.get("rtopic")
-    if size(t) > 0 mqtt.subscribe(t, / tp, p -> self.on_room(p)) end
+    if size(t) > 0 mqtt.subscribe(t, / tp, p -> self.on_reading(p)) end
   end
 
-  def on_room(p)
+  # a number is rounded if asked; anything else (Open, Closed, ...) is shown as it came
+  def on_reading(p)
     var v = num(p)
-    if v != nil self.room = str(int(v + (v < 0 ? -0.5 : 0.5))) + "°" end
+    if v != nil && store.get("rround") p = str(int(v + (v < 0 ? -0.5 : 0.5))) end
+    self.reading = str(p) + store.get("runit")
   end
 
   def loop()
@@ -167,10 +171,10 @@ class GlanceClock
     # right column: time on top, date below, both right-aligned
     text(w - text_ink_width(self.ts) - 1, 6, self.ts, store.get("tcol"))
     text(w - text_ink_width(self.ds) - 1, 14, self.ds, store.get("dcol"))
-    # left column: weather icon + outdoor temperature, room temperature below
+    # left column: weather icon + outdoor temperature, the MQTT reading below
     self.wicon()
     if self.out != nil text(10, 6, self.out, store.get("ocol")) end
-    if self.room != nil text(1, 14, self.room, store.get("rcol")) end
+    if self.reading != nil text(1, 14, self.reading, store.get("rcol")) end
     if store.get("wbar") self.week_bar(w) end
   end
 end
