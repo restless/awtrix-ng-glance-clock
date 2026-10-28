@@ -7,6 +7,7 @@
 # @config  tr      select "Top right"                      default="Time" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Day"
 # @config  bl      select "Bottom left"                    default="MQTT reading 1" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Day"
 # @config  br      select "Bottom right"                   default="Date" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Day"
+# @config  dicon   bool   "Weather icons"                  default=true group="Day"
 # @config  dbri    slider "Brightness"                     default=0 min=0 max=255 help="0 = leave the device brightness alone" group="Day"
 # @config  tcol    color  "Time colour"                    default=#FFFFFF group="Day"
 # @config  dcol    color  "Date colour"                    default=#8888AA group="Day"
@@ -540,7 +541,7 @@ class GlanceClock
     if k == 2 && what != "none" && self.weather_stale()                  # every weather element when the forecast is old
       t = "off"  icon = -1
     end
-    if self.night && !store.get("nicon") icon = -1 end
+    if !store.get(self.night ? "nicon" : "dicon") icon = -1 end
     var tw = t != nil ? text_ink_width(t) : 0
     var iw = icon >= 0 ? 10 : 0
     var x = right ? w - tw - iw - 1 : (iw > 0 ? 0 : 1)

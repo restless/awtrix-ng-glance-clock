@@ -63,6 +63,7 @@ The settings page has these groups, in this order.
 | Setting | Default | |
 |---|---|---|
 | **Day:** Top left, Top right, Bottom left, Bottom right | Weather now, Time, MQTT reading 1, Date | what each corner shows; see below |
+| **Day:** Weather icons | on | |
 | **Day:** Brightness | 0 | 0 leaves the device brightness alone; otherwise set when night mode ends |
 | **Day:** colours | | time, date, weather (temperature, humidity, wind, rain, sun times), MQTT readings, week bar today and other days |
 | **Night:** Night mode | Off | Off, Scheduled (between From and Until) or Always |
