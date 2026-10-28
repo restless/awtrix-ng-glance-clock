@@ -4,6 +4,7 @@
 # @version 0.3
 # @display 52x16
 # @config  t12    select "Hour format"                    default=24h options=24h,12h group="Time"
+# @config  ampm   bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
 # @config  tlz    bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
 # @config  tl     select "Top left"                       default=weather options=weather,time,date,reading,none group="Layout"
 # @config  tr     select "Top right"                      default=time options=weather,time,date,reading,none group="Layout"
@@ -44,7 +45,7 @@
 
 class GlanceClock
   var url, ticks, busy
-  var ts, hh, mm, ds, out, reading, code, day
+  var ts, hh, mm, ap, ds, out, reading, code, day
   var days
   var night, nfrom, nto, col
   var slots
@@ -58,6 +59,7 @@ class GlanceClock
     self.ts = "--:--"
     self.hh = "--"
     self.mm = "--"
+    self.ap = ""
     self.ds = ""
     self.out = nil
     self.reading = nil
@@ -149,13 +151,15 @@ class GlanceClock
     if h >= 0
       var m = minute()
       var hd = h
+      self.ap = ""
       if store.get("t12") == "12h"
         hd = h % 12
         if hd == 0 hd = 12 end
+        if store.get("ampm") self.ap = h < 12 ? "AM" : "PM" end
       end
       self.hh = (hd < 10 && store.get("tlz") ? "0" : "") + str(hd)
       self.mm = (m < 10 ? "0" : "") + str(m)
-      self.ts = self.hh + ":" + self.mm
+      self.ts = self.hh + ":" + self.mm + self.ap
       self.ds = self.date_text()
       var n = self.is_night(h * 60 + m)
       if n != self.night self.switch_mode(n) end
@@ -288,7 +292,8 @@ class GlanceClock
       cc = rgb(((c >> 16) & 255) * f / 1000, ((c >> 8) & 255) * f / 1000, (c & 255) * f / 1000)
     end
     x += text(x, y, ":", cc)
-    text(x, y, self.mm, c)
+    x += text(x, y, self.mm, c)
+    if size(self.ap) > 0 text(x, y, self.ap, c) end
   end
 
   # one corner: slot 0 top left, 1 top right, 2 bottom left, 3 bottom right.
