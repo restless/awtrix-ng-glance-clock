@@ -51,11 +51,23 @@ class GlanceClock
 
   def setup()
     var t = store.get("rtopic")
-    if size(t) > 0 mqtt.subscribe(t, / tp, p -> self.on_reading(p)) end
+    if size(t) == 0 return end
+    # a restart (e.g. saving the settings) would leave the corner empty until the next message
+    if store.get("last_topic", "") == t self.show_reading(store.get("last_value")) end
+    mqtt.subscribe(t, / tp, p -> self.on_reading(p))
+  end
+
+  def on_reading(p)
+    p = str(p)
+    if p != store.get("last_value", nil)
+      store.set("last_topic", store.get("rtopic"))
+      store.set("last_value", p)
+    end
+    self.show_reading(p)
   end
 
   # a number is rounded if asked; anything else (Open, Closed, ...) is shown as it came
-  def on_reading(p)
+  def show_reading(p)
     var v = num(p)
     if v != nil && store.get("rround") p = str(int(v + (v < 0 ? -0.5 : 0.5))) end
     self.reading = str(p) + store.get("runit")
