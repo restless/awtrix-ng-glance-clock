@@ -203,42 +203,57 @@ class GlanceClock
     return m
   end
 
+  # one subscription per topic: the device keeps a single callback per topic, so readings that
+  # share a topic (temperature and humidity of one sensor) are served from the same message
   def setup()
-    for i : 0..3 self.setup_reading(i) end
-  end
-
-  def setup_reading(i)
-    var t = store.get(self.rk[i][0])
-    if size(t) == 0 return end
-    # a restart (e.g. saving the settings) would leave the corner empty until the next message
-    var lk = i == 0 ? "last" : "last" + str(i + 1)
-    if store.get(lk + "_topic", "") == t self.show_reading(i, store.get(lk + "_value")) end
-    mqtt.subscribe(t, / tp, p -> self.on_reading(i, p))
-  end
-
-  def on_reading(i, p)
-    p = str(p)
-    var lk = i == 0 ? "last" : "last" + str(i + 1)
-    if p != store.get(lk + "_value", nil)
-      store.set(lk + "_topic", store.get(self.rk[i][0]))
-      store.set(lk + "_value", p)
+    var topics = {}
+    for i : 0..3
+      var t = store.get(self.rk[i][0])
+      if size(t) == 0 continue end
+      # a restart (e.g. saving the settings) would leave the corner empty until the next message
+      if store.get(self.lk(i) + "_topic", "") == t self.format_reading(i, store.get(self.lk(i) + "_val")) end
+      if !topics.contains(t) topics[t] = [] end
+      topics[t].push(i)
     end
-    self.show_reading(i, p)
+    for t : topics.keys() self.subscribe(t, topics[t]) end
   end
 
-  # payload -> JSON field -> replacement or number with decimals and unit -> label in front
-  def show_reading(i, p)
-    var k = self.rk[i]
-    var v = p
-    var field = store.get(k[1])
-    if size(field) > 0
-      try v = json.load(p) except .. v = nil end
-      for part : string.split(field, ".")
-        v = isinstance(v, map) ? v.find(part) : nil
+  def subscribe(t, readers)
+    mqtt.subscribe(t, / tp, p -> self.on_message(readers, str(p)))
+  end
+
+  def lk(i)
+    return "last" + str(i + 1)
+  end
+
+  def on_message(readers, p)
+    for i : readers
+      var v = self.extract(i, p)
+      if v == nil continue end            # not this reading's field: keep what is shown
+      if v != store.get(self.lk(i) + "_val", nil)   # stored only when it changes, to spare the flash
+        store.set(self.lk(i) + "_topic", store.get(self.rk[i][0]))
+        store.set(self.lk(i) + "_val", v)
       end
-      if v == nil return end            # not this message's field: keep what is shown
+      self.format_reading(i, v)
     end
-    var s = type(v) == "bool" ? (v ? "true" : "false") : str(v)
+  end
+
+  # the payload, or the chosen field of a JSON payload, as a string; nil when the field is missing
+  def extract(i, p)
+    var field = store.get(self.rk[i][1])
+    if size(field) == 0 return p end
+    var v
+    try v = json.load(p) except .. return nil end
+    for part : string.split(field, ".")
+      v = isinstance(v, map) ? v.find(part) : nil
+    end
+    if v == nil return nil end
+    return type(v) == "bool" ? (v ? "true" : "false") : str(v)
+  end
+
+  # replacement, or a number with its decimals and unit, then the label in front
+  def format_reading(i, s)
+    var k = self.rk[i]
     var out = self.rmaps[i].find(string.tolower(s))
     if out == nil
       var n = num(s)
