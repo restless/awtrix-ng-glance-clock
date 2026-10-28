@@ -6,10 +6,10 @@
 # @config  t12    select "Hour format"                    default=24h options=24h,12h group="Time"
 # @config  ampm   bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
 # @config  tlz    bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
-# @config  tl     select "Top left"                       default="Weather now" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Empty" group="Layout"
-# @config  tr     select "Top right"                      default="Time" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Empty" group="Layout"
-# @config  bl     select "Bottom left"                    default="MQTT reading" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Empty" group="Layout"
-# @config  br     select "Bottom right"                   default="Date" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Empty" group="Layout"
+# @config  tl     select "Top left"                       default="Weather now" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Rain chance today,Wind,Sunrise/sunset,Empty" group="Layout"
+# @config  tr     select "Top right"                      default="Time" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Rain chance today,Wind,Sunrise/sunset,Empty" group="Layout"
+# @config  bl     select "Bottom left"                    default="MQTT reading" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Rain chance today,Wind,Sunrise/sunset,Empty" group="Layout"
+# @config  br     select "Bottom right"                   default="Date" options="Weather now,Time,Date,MQTT reading,Humidity outdoors,Feels like,High/low today,Tomorrow,Rain chance today,Wind,Sunrise/sunset,Empty" group="Layout"
 # @config  tsep   select "Colon"                          default=steady options=steady,blink,pulse group="Time"
 # @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
 # @config  wday   bool   "Weekday in the date"            default=true group="Date"
@@ -22,6 +22,7 @@
 # @config  lat    number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
 # @config  lon    number "Longitude"                      default=13.405 min=-180 max=180 step=0.0001 group="Weather"
 # @config  unit   select "Temperature unit"               default=C options=C,F group="Weather"
+# @config  wunit  select "Wind unit"                      default=km/h options=km/h,m/s,mph group="Weather"
 # @config  wref   number "Weather refresh"                default=10 min=5 max=60 unit=min group="Weather"
 # @config  rtopic text   "MQTT topic"                     default="" help="Shown at the bottom left; empty hides it" group="Reading"
 # @config  runit  text   "Unit"                           default="°" maxlen=4 help="Added after the value, e.g. ° or %" group="Reading"
@@ -46,15 +47,17 @@
 class GlanceClock
   var url, ticks, busy
   var ts, hh, mm, ap, ds, out, reading, code, day
-  var hum, feels, hilo, tmax, tcode
+  var hum, feels, hilo, tmax, tcode, rain, wind
+  var sunev, suntxt, sunicon
   var days
   var night, nfrom, nto, col
   var slots
 
   def init()
     self.url = "https://api.open-meteo.com/v1/forecast?latitude=" + str(store.get("lat")) +
-               "&longitude=" + str(store.get("lon")) + "&current=temperature_2m,weather_code,is_day,relative_humidity_2m,apparent_temperature" +
-               "&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=2&timezone=auto" +
+               "&longitude=" + str(store.get("lon")) + "&current=temperature_2m,weather_code,is_day,relative_humidity_2m,apparent_temperature,wind_speed_10m" +
+               "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset" +
+               "&forecast_days=2&timezone=auto&wind_speed_unit=" + {"km/h": "kmh", "m/s": "ms", "mph": "mph"}.find(store.get("wunit"), "kmh") +
                (store.get("unit") == "F" ? "&temperature_unit=fahrenheit" : "")
     self.ticks = 0
     self.busy = false
@@ -67,6 +70,8 @@ class GlanceClock
     self.reading = nil
     self.code = -1
     self.tcode = -1
+    self.sunev = nil
+    self.sunicon = -1
     self.day = 1
     var names = {
       "English":    ["SU", "MO", "TU", "WE", "TH", "FR", "SA"],
@@ -84,7 +89,8 @@ class GlanceClock
     var ids = {
       "Weather now": "weather", "Time": "time", "Date": "date", "MQTT reading": "reading",
       "Humidity outdoors": "humidity", "Feels like": "feels", "High/low today": "hilo",
-      "Tomorrow": "tomorrow", "Empty": "none"
+      "Tomorrow": "tomorrow", "Rain chance today": "rain", "Wind": "wind",
+      "Sunrise/sunset": "sun", "Empty": "none"
     }
     self.slots = []
     for k : ["tl", "tr", "bl", "br"]
@@ -174,15 +180,34 @@ class GlanceClock
       self.mm = (m < 10 ? "0" : "") + str(m)
       self.ts = self.hh + ":" + self.mm + self.ap
       self.ds = self.date_text()
+      if self.sunev != nil
+        var now = h * 60 + m
+        var e = now < self.sunev[0] ? 0 : (now < self.sunev[1] ? 1 : 2)
+        self.sunicon = e == 1 ? 1001 : 1000
+        self.suntxt = self.fmt_hm(self.sunev[e])
+      end
       var n = self.is_night(h * 60 + m)
       if n != self.night self.switch_mode(n) end
     end
     if self.ticks <= 0 && !self.busy
       self.ticks = int(store.get("wref")) * 60
       self.busy = true
-      http.get(self.url, / b, st -> self.on_wx(b, st), {'cap': 3072})
+      http.get(self.url, / b, st -> self.on_wx(b, st), {'cap': 4096})
     end
     self.ticks -= 1
+  end
+
+  # minutes after midnight as h:mm in the clock's hour format, without the colon effects
+  def fmt_hm(t)
+    var h = t / 60
+    var m = t % 60
+    var ap = ""
+    if store.get("t12") == "12h"
+      if store.get("ampm") ap = h < 12 ? "AM" : "PM" end
+      h = h % 12
+      if h == 0 h = 12 end
+    end
+    return (h < 10 && store.get("tlz") ? "0" : "") + str(h) + ":" + (m < 10 ? "0" : "") + str(m) + ap
   end
 
   def date_text()
@@ -243,6 +268,16 @@ class GlanceClock
       self.tmax = self.deg(real(hi[2]))
     end
     if dc != nil self.tcode = int(dc[2]) end
+    var pr = re.search("precipitation_probability_max\":\\[([0-9]+)", b)
+    var ws = re.search("wind_speed_10m\":([0-9.]+)", b)
+    var hm = "T([0-9][0-9]):([0-9][0-9])\""
+    var sr = re.search("sunrise\":\\[\"[^T]*" + hm + ",\"[^T]*" + hm, b)
+    var ss = re.search("sunset\":\\[\"[^T]*" + hm, b)
+    if pr != nil self.rain = pr[1] + "%" end
+    if ws != nil self.wind = str(int(real(ws[1]) + 0.5)) + store.get("wunit") end
+    if sr != nil && ss != nil      # today's sunrise and sunset, tomorrow's sunrise, in minutes
+      self.sunev = [int(sr[1]) * 60 + int(sr[2]), int(ss[1]) * 60 + int(ss[2]), int(sr[3]) * 60 + int(sr[4])]
+    end
   end
 
   # --- 8x8 weather icons, drawn by hand so nothing has to be installed ---
@@ -263,6 +298,13 @@ class GlanceClock
     var moon = self.ic(0xD0D0A0)
     if c < 0
       return
+    elif c >= 1000
+      var o = self.ic(0xFF9000)
+      if c == 1000 pixel(x + 3, y, sun) pixel(x + 2, y + 1, sun) pixel(x + 4, y + 1, sun)
+      else pixel(x + 2, y, sun) pixel(x + 4, y, sun) pixel(x + 3, y + 1, sun)
+      end
+      line(x + 2, y + 3, x + 4, y + 3, sun) rect_fill(x + 1, y + 4, 5, 2, sun)
+      line(x, y + 6, x + 6, y + 6, o)
     elif c == 0 || c == 1
       if isday
         circle_fill(x + 3, y + 3, 2, sun)
@@ -345,6 +387,9 @@ class GlanceClock
     elif what == "hilo"         t = self.hilo
     elif what == "weather"      t = self.out  icon = self.code  isday = self.day == 1
     elif what == "tomorrow"     t = self.tmax  icon = self.tcode
+    elif what == "rain"         t = self.rain  icon = self.rain != nil ? 61 : -1
+    elif what == "wind"         t = self.wind
+    elif what == "sun"          t = self.suntxt  icon = self.sunicon
     end
     if self.night && !store.get("nicon") icon = -1 end
     var tw = t != nil ? text_ink_width(t) : 0
