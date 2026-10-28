@@ -60,6 +60,10 @@
 # @config  nmode   select "Night mode"                     default="Off" options="Off,Scheduled,Always" help="Off: never · Scheduled: from From until Until · Always: all day" group="Night"
 # @config  nfrom   text   "From (hh:mm)"                   default="22:00" maxlen=5 group="Night"
 # @config  nto     text   "Until (hh:mm)"                  default="07:00" maxlen=5 group="Night"
+# @config  ntl     select "Top left"                       default="Same as day" options="Same as day,Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Night"
+# @config  ntr     select "Top right"                      default="Same as day" options="Same as day,Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Night"
+# @config  nbl     select "Bottom left"                    default="Same as day" options="Same as day,Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Night"
+# @config  nbr     select "Bottom right"                   default="Same as day" options="Same as day,Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Night"
 # @config  nicon   bool   "Weather icons"                  default=true group="Night"
 # @config  nbri    slider "Brightness"                     default=8 min=0 max=255 help="0 = leave the device brightness alone" group="Night"
 # @config  ntcol   color  "Time colour"                    default=#30E040 group="Night"
@@ -80,7 +84,7 @@ class GlanceClock
   var sunev, suntxt, sunicon
   var days, months
   var night, nfrom, nto, col
-  var slots
+  var slots, dslots, nslots
 
   def init()
     self.url = "https://api.open-meteo.com/v1/forecast?latitude=" + str(store.get("lat")) +
@@ -139,11 +143,15 @@ class GlanceClock
       "Weather tomorrow": "tomorrow", "Tomorrow": "tomorrow", "Rain chance today": "rain", "Wind": "wind",
       "Sunrise/sunset": "sun", "Empty": "none"
     }
-    self.slots = []
-    for k : ["tl", "tr", "bl", "br"]
-      var v = store.get(k)
-      self.slots.push(ids.find(v, v))
+    self.dslots = []
+    self.nslots = []
+    for i : 0..3
+      var v = store.get(["tl", "tr", "bl", "br"][i])
+      self.dslots.push(ids.find(v, v))
+      var nv = store.get(["ntl", "ntr", "nbl", "nbr"][i])
+      self.nslots.push(nv == "Same as day" ? self.dslots[i] : ids.find(nv, nv))
     end
+    self.slots = self.dslots
   end
 
   # "22:00" -> minutes after midnight, nil if it does not read as a time
@@ -172,6 +180,7 @@ class GlanceClock
   def switch_mode(n)
     self.night = n
     self.use_colours(n)
+    self.slots = n ? self.nslots : self.dslots
     var nb = int(store.get("nbri"))
     var db = int(store.get("dbri"))
     if n
