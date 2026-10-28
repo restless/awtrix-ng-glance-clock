@@ -495,7 +495,7 @@ class GlanceClock
   def draw_slot(i, w)
     var what = self.slots[i]
     var right = i == 1 || i == 3
-    var y = i < 2 ? 6 : 14
+    var y = i < 2 ? 6 : height() - 2           # the bottom row follows the panel height
     if what == "time"
       self.draw_time(right ? w - text_ink_width(self.ts) - 1 : 1, y, self.col[0])
       return
