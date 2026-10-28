@@ -76,6 +76,7 @@ The settings page has these groups, in this order.
 | **Time:** AM/PM | on | 12h only |
 | **Time:** Leading zero | on | 08:05 rather than 8:05 |
 | **Time:** Colon | steady | steady, blink or pulse |
+| **Time:** Seconds | off | adds `:ss`; the time gets wider |
 | **Date:** Language | English | weekday and month names: English, Polski, Deutsch, Français, Українська |
 | **Date:** Weekday in the date | on | for the presets; a custom format places the weekday itself with `ww` |
 | **Date:** Date format | dd.mm | dd.mm, dd.mm.yy, dd-mm, dd-mm-yy, mm/dd, mm/dd/yy, yyyy-mm-dd, mon dd (`OCT 28`), dd mon or custom |

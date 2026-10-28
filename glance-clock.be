@@ -34,6 +34,7 @@
 # @config  ampm    bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
 # @config  tlz     bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
 # @config  tsep    select "Colon"                          default=steady options=steady,blink,pulse group="Time"
+# @config  tsec    bool   "Seconds"                        default=false help="Adds :ss; the time gets wider" group="Time"
 # @config  lang    select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday and month names" group="Date"
 # @config  wday    bool   "Weekday in the date"            default=true help="For the presets · a custom format uses ww" group="Date"
 # @config  dfmt    select "Date format"                    default=dd.mm options="dd.mm,dd.mm.yy,dd-mm,dd-mm-yy,mm/dd,mm/dd/yy,yyyy-mm-dd,mon dd,dd mon,custom" group="Date"
@@ -84,7 +85,7 @@ class GlanceClock
   var rk, rv, rlast, rmaps
   var hum, feels, hilo, tmax, tcode, rain, wind
   var sunev, suntxt, sunicon
-  var days, months
+  var days, months, secs
   var night, nfrom, nto, col
   var slots, dslots, nslots
 
@@ -133,6 +134,8 @@ class GlanceClock
       "Українська": ["СІЧ", "ЛЮТ", "БЕР", "КВІ", "ТРА", "ЧЕР", "ЛИП", "СЕР", "ВЕР", "ЖОВ", "ЛИС", "ГРУ"]
     }
     self.months = mnames.find(store.get("lang"), mnames["English"])
+    self.secs = []                    # "00".."59", so drawing the seconds allocates nothing per frame
+    for i : 0..59 self.secs.push((i < 10 ? "0" : "") + str(i)) end
     self.night = nil
     self.nfrom = self.parse_hm(store.get("nfrom"))
     self.nto = self.parse_hm(store.get("nto"))
@@ -304,7 +307,7 @@ class GlanceClock
       end
       self.hh = (hd < 10 && store.get("tlz") ? "0" : "") + str(hd)
       self.mm = (m < 10 ? "0" : "") + str(m)
-      self.ts = self.hh + ":" + self.mm + self.ap
+      self.ts = self.hh + ":" + self.mm + (store.get("tsec") ? ":00" : "") + self.ap      # for the width
       self.ds = self.date_text()
       if self.sunev != nil
         var now = h * 60 + m
@@ -505,6 +508,11 @@ class GlanceClock
     end
     x += text(x, y, ":", cc)
     x += text(x, y, self.mm, c)
+    if store.get("tsec")
+      var sec = second()
+      x += text(x, y, ":", cc)
+      x += text(x, y, self.secs[sec < 0 ? 0 : sec], c)
+    end
     if size(self.ap) > 0 text(x, y, self.ap, c) end
   end
 
