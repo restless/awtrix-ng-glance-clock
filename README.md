@@ -20,7 +20,7 @@ are drawn by the script, so there is nothing to install.
 ## Features
 
 - Small time and date, aligned to the right edge; weekday names in English, Polish, German,
-  French or Ukrainian, and four date formats
+  French or Ukrainian; date presets with dots, dashes or slashes, or a pattern of your own
 - Optional week bar: seven dashes on the bottom row with today lit
 - Outdoor temperature in °C or °F with a weather icon: clear (sun or moon), partly cloudy, cloudy, fog, rain,
   snow and thunderstorm
@@ -28,6 +28,10 @@ are drawn by the script, so there is nothing to install.
   temperature, the humidity, or text such as `Open` from a door sensor
 
   ![A text reading](docs/reading-text.png)
+- Night mode, on a schedule or always on: its own colours for every element (the weather icon
+  included) and its own brightness
+
+  ![Night mode](docs/night.png)
 - Colours for every element
 - The layout is anchored to the panel's edges, so it spreads out on larger panels
 
@@ -49,7 +53,8 @@ The default is Berlin.
 |---|---|---|
 | Language | English | the weekday names: English, Polski, Deutsch, Français, Українська |
 | Weekday in the date | on | |
-| Date format | dd.mm | dd.mm, dd.mm.yy, mm/dd or mm/dd/yy |
+| Date format | dd.mm | dd.mm, dd.mm.yy, dd-mm, dd-mm-yy, mm/dd, mm/dd/yy, yyyy-mm-dd or custom |
+| Custom date format | d.mm.yy | used when Date format is custom: `dd` `d` `mm` `m` `yyyy` `yy` `ww` (weekday); anything else is shown as typed, e.g. `ww d·m` |
 | Week bar | off | seven dashes on the bottom row, today lit |
 | Week starts on Monday | on | |
 | Today, Other days | white, grey | the week bar's colours |
@@ -60,6 +65,16 @@ The default is Berlin.
 | Unit | ° | added after the value, e.g. `°` or `%`; empty for text |
 | Round numbers | on | numbers are rounded; text is shown as it is |
 | Time, date, outdoor temperature and reading colours | | |
+| Day brightness | 0 | 0 leaves the device brightness alone; otherwise set when night mode ends |
+| Night mode | off | off, schedule or on |
+| Night from, Night until | 22:00, 07:00 | the schedule; it may wrap past midnight |
+| Night brightness | 8 | 0 leaves the device brightness alone |
+| Weather icon at night | on | |
+| Night colours | greens | time, date, outdoor temperature, reading and week bar |
+
+Brightness is a device-wide setting. With a day brightness of 0, the brightness the device had
+before night began is restored in the morning. Long custom date formats can run into the reading
+on the left; keep them short.
 
 ### A reading from Home Assistant
 
