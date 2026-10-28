@@ -201,24 +201,34 @@ class GlanceClock
     return now >= self.nfrom || now < self.nto        # the window wraps past midnight
   end
 
-  # brightness is a device setting: the day value is remembered before night changes it
+  # Brightness is a device setting. Before night sets it, the day value and the automatic
+  # brightness switch are saved (that survives restarts) and given back in the morning; the
+  # day brightness setting is applied only then, never at start-up, so it does not undo the knob.
   def switch_mode(n)
+    var was = self.night
     self.night = n
     self.use_colours(n)
     self.slots = n ? self.nslots : self.dslots
     var nb = int(store.get("nbri"))
     var db = int(store.get("dbri"))
+    var saved = store.get("saved_bri", -1)
+    if type(saved) != "int" saved = -1 end           # 0.3 to 0.8 stored false for "nothing saved"
     if n
       if nb > 0
-        if !store.get("saved_bri", false) store.set("saved_bri", settings.get("brightness")) end
+        if saved < 0
+          store.set("saved_bri", settings.get("brightness"))
+          store.set("saved_auto", settings.get("autoBrightness") == true)
+        end
+        if settings.get("autoBrightness") settings.set("autoBrightness", false) end   # it would ignore ours
         settings.set("brightness", nb)
       end
-    else
-      var saved = store.get("saved_bri", false)
+    elif was == true || saved >= 0                   # night has ended, now or while the app was off
       if db > 0 settings.set("brightness", db)
-      elif saved settings.set("brightness", saved)
+      elif saved >= 0 settings.set("brightness", saved)
       end
-      store.set("saved_bri", false)
+      if store.get("saved_auto", false) settings.set("autoBrightness", true) end
+      store.set("saved_bri", -1)
+      store.set("saved_auto", false)
     end
   end
 
