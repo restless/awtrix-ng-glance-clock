@@ -6,6 +6,10 @@
 # @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
 # @config  wday   bool   "Weekday in the date"            default=true group="Date"
 # @config  dfmt   select "Date format"                    default=dd.mm options=dd.mm,dd.mm.yy,mm/dd,mm/dd/yy group="Date"
+# @config  wbar   bool   "Week bar"                       default=false help="Seven dashes on the bottom row, today lit" group="Week bar"
+# @config  wmon   bool   "Week starts on Monday"          default=true group="Week bar"
+# @config  wtd    color  "Today"                          default=#FFFFFF group="Week bar"
+# @config  wod    color  "Other days"                     default=#404040 group="Week bar"
 # @config  lat    number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
 # @config  lon    number "Longitude"                      default=13.405 min=-180 max=180 step=0.0001 group="Weather"
 # @config  unit   select "Temperature unit"               default=C options=C,F group="Weather"
@@ -145,6 +149,18 @@ class GlanceClock
     end
   end
 
+  # seven dashes on the bottom row, centred, as wide as the panel allows
+  def week_bar(w)
+    var seg = (w + 1) / 7 - 1
+    var x = (w - (7 * seg + 6)) / 2
+    var today = weekday()
+    if store.get("wmon") today = (today + 6) % 7 end
+    for i : 0..6
+      line(x, height() - 1, x + seg - 1, height() - 1, i == today ? store.get("wtd") : store.get("wod"))
+      x += seg + 1
+    end
+  end
+
   def draw()
     clear()
     var w = width()
@@ -155,6 +171,7 @@ class GlanceClock
     self.wicon()
     if self.out != nil text(10, 6, self.out, store.get("ocol")) end
     if self.room != nil text(1, 14, self.room, store.get("rcol")) end
+    if store.get("wbar") self.week_bar(w) end
   end
 end
 
