@@ -3,6 +3,7 @@
 # @author  restless
 # @version 0.1
 # @display 52x16
+# @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
 # @config  lat    number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
 # @config  lon    number "Longitude"                      default=13.405 min=-180 max=180 step=0.0001 group="Weather"
 # @config  wref   number "Weather refresh"                default=10 min=5 max=60 unit=min group="Weather"
@@ -28,7 +29,14 @@ class GlanceClock
     self.room = nil
     self.code = -1
     self.day = 1
-    self.days = ["ND", "PN", "WT", "ŚR", "CZ", "PT", "SB"]
+    var names = {
+      "English":    ["SU", "MO", "TU", "WE", "TH", "FR", "SA"],
+      "Polski":     ["ND", "PN", "WT", "ŚR", "CZ", "PT", "SB"],
+      "Deutsch":    ["SO", "MO", "DI", "MI", "DO", "FR", "SA"],
+      "Français":   ["DI", "LU", "MA", "ME", "JE", "VE", "SA"],
+      "Українська": ["НД", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"]
+    }
+    self.days = names.find(store.get("lang"), names["English"])
   end
 
   def setup()
