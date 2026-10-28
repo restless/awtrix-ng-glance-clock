@@ -24,6 +24,7 @@
 # @config  nbr     select "Bottom right"                   default="Same as day" options="Same as day,Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,MQTT reading 3,MQTT reading 4,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Night"
 # @config  nicon   bool   "Weather icons"                  default=true group="Night"
 # @config  nbri    slider "Brightness"                     default=8 min=0 max=255 help="0 = leave the device brightness alone" group="Night"
+# @config  ntsep   select "Colon"                          default=steady options=steady,blink,pulse help="Dimmed colours change hue at low brightness" group="Night"
 # @config  ntcol   color  "Time colour"                    default=#30E040 group="Night"
 # @config  ndcol   color  "Date colour"                    default=#106A1C group="Night"
 # @config  nocol   color  "Weather colour"                 default=#1C9030 group="Night"
@@ -170,7 +171,7 @@ class GlanceClock
     end
     self.slots = self.dslots
     self.order = [0, 2, 1, 3]          # left corners first, right ones on top
-    self.tsep = store.get("tsep")
+    self.tsep = [store.get("tsep"), store.get("ntsep")]
     self.tsec = store.get("tsec")
     self.wbar = store.get("wbar")
     self.wmon = store.get("wmon")
@@ -572,7 +573,7 @@ class GlanceClock
     var m = minute()
     if m >= 0 && m != self.lastmin self.build_time(hour(), m) end   # loop() may run late in the second
     x += text(x, y, self.hh, c)
-    var sep = self.tsep
+    var sep = self.tsep[self.night ? 1 : 0]
     var phase = now_ms() % 2000
     var cc = c
     if sep == "blink"

@@ -77,11 +77,12 @@ The settings page has these groups, in this order.
 | **Night:** Top left … Bottom right | Same as day | a corner can show something else at night, or nothing |
 | **Night:** Weather icons | on | |
 | **Night:** Brightness | 8 | 0 leaves the device brightness alone |
+| **Night:** Colon | steady | steady, blink or pulse; at low brightness a dimmed colour changes hue, so pulsing looks off |
 | **Night:** colours | greens | the same list as Day |
 | **Time:** Hour format | 24h | 24h or 12h |
 | **Time:** AM/PM | on | 12h only |
 | **Time:** Leading zero | on | 08:05 rather than 8:05 |
-| **Time:** Colon | steady | steady, blink or pulse |
+| **Time:** Colon | steady | steady, blink or pulse, by day |
 | **Time:** Seconds | off | adds `:ss`; the time gets wider |
 | **Date:** Language | English | weekday and month names: English, Polski, Deutsch, Français, Українська |
 | **Date:** Weekday in the date | on | for the presets; a custom format places the weekday itself with `ww` |
