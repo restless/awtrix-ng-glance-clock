@@ -5,7 +5,7 @@ and larger, such as the Ulanzi TC002. Instead of filling the panel with huge dig
 everything you want to see at a glance on one screen: the time and date, the weather outside, and
 readings from your own sensors.
 
-![Glance Clock: weather, time, a room temperature and the date, with the week bar](docs/default.png)
+![Glance Clock: weather, time with seconds, the next sunrise and the date, with the week bar](docs/default.png)
 
 **Get it on the AWTRIX Hub: [awtrix.de/script/fDmv7toQMZbE](https://awtrix.de/script/fDmv7toQMZbE)**
 
