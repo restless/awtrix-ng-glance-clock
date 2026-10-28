@@ -68,21 +68,20 @@ The default is Berlin.
 | Custom date format | d.mm.yy | used when Date format is custom: `dd` `d` `mm` `m` `yyyy` `yy` `ww` (weekday); anything else is shown as typed, e.g. `ww d·m` |
 | Week bar | off | seven dashes on the bottom row, today lit |
 | Week starts on Monday | on | |
-| Today, Other days | white, grey | the week bar's colours |
 | Latitude, Longitude | Berlin | the place whose weather is shown |
 | Temperature unit | C | C or F |
 | Wind unit | km/h | km/h, m/s or mph |
 | Weather refresh | 10 min | how often the weather is fetched |
-| MQTT topic | empty | a topic on the broker set in AWTRIX's MQTT settings; empty hides the reading |
+| MQTT topic | empty | for a corner set to MQTT reading: a topic on the broker set in AWTRIX's MQTT settings |
 | Unit | ° | added after the value, e.g. `°` or `%`; empty for text |
 | Round numbers | on | numbers are rounded; text is shown as it is |
-| Time, date, outdoor temperature and reading colours | | |
-| Day brightness | 0 | 0 leaves the device brightness alone; otherwise set when night mode ends |
-| Night mode | off | off, schedule or on |
-| Night from, Night until | 22:00, 07:00 | the schedule; it may wrap past midnight |
-| Night brightness | 8 | 0 leaves the device brightness alone |
-| Weather icon at night | on | |
-| Night colours | greens | time, date, outdoor temperature, reading and week bar |
+| **Day:** Brightness | 0 | 0 leaves the device brightness alone; otherwise set when night mode ends |
+| **Day:** colours | | time, date, weather (temperature, humidity, wind, rain, sun times), MQTT reading, week bar today and other days |
+| **Night:** Night mode | off | off, schedule or on |
+| **Night:** From, Until | 22:00, 07:00 | the schedule; it may wrap past midnight |
+| **Night:** Weather icons | on | |
+| **Night:** Brightness | 8 | 0 leaves the device brightness alone |
+| **Night:** colours | greens | the same list as Day |
 
 Brightness is a device-wide setting. With a day brightness of 0, the brightness the device had
 before night began is restored in the morning. Long custom date formats can run into the reading
