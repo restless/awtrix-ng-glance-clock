@@ -3,50 +3,65 @@
 # @author  restless
 # @version 0.5
 # @display 52x16
-# @config  tl     select "Top left"                       default="Weather now" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
-# @config  tr     select "Top right"                      default="Time" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
-# @config  bl     select "Bottom left"                    default="MQTT reading" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
-# @config  br     select "Bottom right"                   default="Date" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
-# @config  t12    select "Hour format"                    default=24h options=24h,12h group="Time"
-# @config  ampm   bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
-# @config  tlz    bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
-# @config  tsep   select "Colon"                          default=steady options=steady,blink,pulse group="Time"
-# @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
-# @config  wday   bool   "Weekday in the date"            default=true group="Date"
-# @config  dfmt   select "Date format"                    default=dd.mm options=dd.mm,dd.mm.yy,dd-mm,dd-mm-yy,mm/dd,mm/dd/yy,yyyy-mm-dd,custom group="Date"
-# @config  dcust  text   "Custom date format"             default="d.mm.yy" maxlen=24 help="For Date format custom: dd d mm m yyyy yy ww (weekday), anything else as typed" group="Date"
-# @config  wbar   bool   "Week bar"                       default=false help="Seven dashes on the bottom row, today lit" group="Week bar"
-# @config  wmon   bool   "Week starts on Monday"          default=true group="Week bar"
-# @config  lat    number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
-# @config  lon    number "Longitude"                      default=13.405 min=-180 max=180 step=0.0001 group="Weather"
-# @config  unit   select "Temperature unit"               default=C options=C,F group="Weather"
-# @config  wunit  select "Wind unit"                      default=km/h options=km/h,m/s,mph group="Weather"
-# @config  wref   number "Weather refresh"                default=10 min=5 max=60 unit=min group="Weather"
-# @config  rtopic text   "MQTT topic"                     default="" help="For a corner set to MQTT reading; empty hides it" group="MQTT reading"
-# @config  runit  text   "Unit"                           default="°" maxlen=4 help="Added after the value, e.g. ° or %" group="MQTT reading"
-# @config  rround bool   "Round numbers"                  default=true help="Text such as Open stays as it is" group="MQTT reading"
-# @config  dbri   slider "Brightness"                     default=0 min=0 max=255 help="0 leaves the device brightness alone" group="Day"
-# @config  tcol   color  "Time colour"                    default=#FFFFFF group="Day"
-# @config  dcol   color  "Date colour"                    default=#8888AA group="Day"
-# @config  ocol   color  "Weather colour"                 default=#FFB040 help="Outdoor temperature, humidity, wind, rain, sun times" group="Day"
-# @config  rcol   color  "MQTT reading colour"            default=#40C0FF group="Day"
-# @config  wtd    color  "Week bar: today colour"         default=#FFFFFF group="Day"
-# @config  wod    color  "Week bar: other days colour"    default=#404040 group="Day"
-# @config  nmode  select "Night mode"                     default=off options=off,schedule,on help="schedule: between the two times below" group="Night"
-# @config  nfrom  text   "From (hh:mm)"                   default="22:00" maxlen=5 group="Night"
-# @config  nto    text   "Until (hh:mm)"                  default="07:00" maxlen=5 group="Night"
-# @config  nicon  bool   "Weather icons"                  default=true group="Night"
-# @config  nbri   slider "Brightness"                     default=8 min=0 max=255 help="0 leaves the device brightness alone" group="Night"
-# @config  ntcol  color  "Time colour"                    default=#30E040 group="Night"
-# @config  ndcol  color  "Date colour"                    default=#106A1C group="Night"
-# @config  nocol  color  "Weather colour"                 default=#1C9030 group="Night"
-# @config  nrcol  color  "MQTT reading colour"            default=#106A1C group="Night"
-# @config  nwtd   color  "Week bar: today colour"         default=#1C9030 group="Night"
-# @config  nwod   color  "Week bar: other days colour"    default=#04200A group="Night"
+# @config  tl      select "Top left"                       default="Weather now" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  tr      select "Top right"                      default="Time" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  bl      select "Bottom left"                    default="MQTT reading 1" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  br      select "Bottom right"                   default="Date" options="Date,Empty,Feels like,High/low today,Humidity outdoors,MQTT reading 1,MQTT reading 2,Rain chance today,Sunrise/sunset,Time,Weather now,Weather tomorrow,Wind" group="Layout"
+# @config  t12     select "Hour format"                    default=24h options=24h,12h group="Time"
+# @config  ampm    bool   "AM/PM"                          default=true help="12h only: AM or PM after the minutes" group="Time"
+# @config  tlz     bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
+# @config  tsep    select "Colon"                          default=steady options=steady,blink,pulse group="Time"
+# @config  lang    select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
+# @config  wday    bool   "Weekday in the date"            default=true group="Date"
+# @config  dfmt    select "Date format"                    default=dd.mm options=dd.mm,dd.mm.yy,dd-mm,dd-mm-yy,mm/dd,mm/dd/yy,yyyy-mm-dd,custom group="Date"
+# @config  dcust   text   "Custom date format"             default="d.mm.yy" maxlen=24 help="For Date format custom: dd d mm m yyyy yy ww (weekday), anything else as typed" group="Date"
+# @config  wbar    bool   "Week bar"                       default=false help="Seven dashes on the bottom row, today lit" group="Week bar"
+# @config  wmon    bool   "Week starts on Monday"          default=true group="Week bar"
+# @config  lat     number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
+# @config  lon     number "Longitude"                      default=13.405 min=-180 max=180 step=0.0001 group="Weather"
+# @config  unit    select "Temperature unit"               default=C options=C,F group="Weather"
+# @config  wunit   select "Wind unit"                      default=km/h options=km/h,m/s,mph group="Weather"
+# @config  wref    number "Weather refresh"                default=10 min=5 max=60 unit=min group="Weather"
+# @config  rtopic  text   "Topic"                          default="" help="e.g. zigbee2mqtt/door or a topic Home Assistant publishes to" group="MQTT reading 1"
+# @config  rjson   text   "JSON field"                     default="" help="Empty for a plain value. For {temperature: 21.5} enter temperature; nested: a.b" group="MQTT reading 1"
+# @config  rmap    text   "Replace values"                 default="" help="Comma separated. Door: true=Closed,false=Open. Switch: ON=On,OFF=Off" group="MQTT reading 1"
+# @config  rdec    select "Decimals"                       default="0" options="as sent,0,1,2" help="Digits after the point for numbers" group="MQTT reading 1"
+# @config  runit   text   "Unit"                           default="°" maxlen=4 help="Added after numbers, e.g. ° or %" group="MQTT reading 1"
+# @config  rlabel  text   "Label"                          default="" maxlen=6 help="Short text before the value, e.g. In" group="MQTT reading 1"
+# @config  rstale  number "Offline after"                  default=0 min=0 max=1440 unit=min help="Shows off when nothing arrived for this long; 0 never" group="MQTT reading 1"
+# @config  r2topic text   "Topic"                          default="" help="e.g. zigbee2mqtt/door or a topic Home Assistant publishes to" group="MQTT reading 2"
+# @config  r2json  text   "JSON field"                     default="" help="Empty for a plain value. For {temperature: 21.5} enter temperature; nested: a.b" group="MQTT reading 2"
+# @config  r2map   text   "Replace values"                 default="" help="Comma separated. Door: true=Closed,false=Open. Switch: ON=On,OFF=Off" group="MQTT reading 2"
+# @config  r2dec   select "Decimals"                       default="0" options="as sent,0,1,2" help="Digits after the point for numbers" group="MQTT reading 2"
+# @config  r2unit  text   "Unit"                           default="°" maxlen=4 help="Added after numbers, e.g. ° or %" group="MQTT reading 2"
+# @config  r2label text   "Label"                          default="" maxlen=6 help="Short text before the value, e.g. In" group="MQTT reading 2"
+# @config  r2stale number "Offline after"                  default=0 min=0 max=1440 unit=min help="Shows off when nothing arrived for this long; 0 never" group="MQTT reading 2"
+# @config  dbri    slider "Brightness"                     default=0 min=0 max=255 help="0 leaves the device brightness alone" group="Day"
+# @config  tcol    color  "Time colour"                    default=#FFFFFF group="Day"
+# @config  dcol    color  "Date colour"                    default=#8888AA group="Day"
+# @config  ocol    color  "Weather colour"                 default=#FFB040 help="Outdoor temperature, humidity, wind, rain, sun times" group="Day"
+# @config  rcol    color  "MQTT reading colour"            default=#40C0FF group="Day"
+# @config  wtd     color  "Week bar: today colour"         default=#FFFFFF group="Day"
+# @config  wod     color  "Week bar: other days colour"    default=#404040 group="Day"
+# @config  nmode   select "Night mode"                     default=off options=off,schedule,on help="schedule: between the two times below" group="Night"
+# @config  nfrom   text   "From (hh:mm)"                   default="22:00" maxlen=5 group="Night"
+# @config  nto     text   "Until (hh:mm)"                  default="07:00" maxlen=5 group="Night"
+# @config  nicon   bool   "Weather icons"                  default=true group="Night"
+# @config  nbri    slider "Brightness"                     default=8 min=0 max=255 help="0 leaves the device brightness alone" group="Night"
+# @config  ntcol   color  "Time colour"                    default=#30E040 group="Night"
+# @config  ndcol   color  "Date colour"                    default=#106A1C group="Night"
+# @config  nocol   color  "Weather colour"                 default=#1C9030 group="Night"
+# @config  nrcol   color  "MQTT reading colour"            default=#106A1C group="Night"
+# @config  nwtd    color  "Week bar: today colour"         default=#1C9030 group="Night"
+# @config  nwod    color  "Week bar: other days colour"    default=#04200A group="Night"
+
+import json
+import string
 
 class GlanceClock
   var url, ticks, busy
-  var ts, hh, mm, ap, ds, out, reading, code, day
+  var ts, hh, mm, ap, ds, out, code, day
+  var rk, rv, rlast, rmaps
   var hum, feels, hilo, tmax, tcode, rain, wind
   var sunev, suntxt, sunicon
   var days
@@ -67,7 +82,13 @@ class GlanceClock
     self.ap = ""
     self.ds = ""
     self.out = nil
-    self.reading = nil
+    # setting keys of reading 1 and 2: topic, JSON field, replacements, decimals, unit, label, offline after
+    self.rk = [["rtopic", "rjson", "rmap", "rdec", "runit", "rlabel", "rstale"],
+               ["r2topic", "r2json", "r2map", "r2dec", "r2unit", "r2label", "r2stale"]]
+    self.rv = [nil, nil]
+    self.rlast = [now_ms(), now_ms()]
+    self.rmaps = []
+    for i : 0..1 self.rmaps.push(self.parse_map(store.get(self.rk[i][2]))) end
     self.code = -1
     self.tcode = -1
     self.sunev = nil
@@ -87,7 +108,8 @@ class GlanceClock
     self.use_colours(false)
     # the labels picked in the web UI, and the short names stored by 0.4
     var ids = {
-      "Weather now": "weather", "Time": "time", "Date": "date", "MQTT reading": "reading",
+      "Weather now": "weather", "Time": "time", "Date": "date",
+      "MQTT reading 1": "reading1", "MQTT reading 2": "reading2", "MQTT reading": "reading1", "reading": "reading1",
       "Humidity outdoors": "humidity", "Feels like": "feels", "High/low today": "hilo",
       "Weather tomorrow": "tomorrow", "Tomorrow": "tomorrow", "Rain chance today": "rain", "Wind": "wind",
       "Sunrise/sunset": "sun", "Empty": "none"
@@ -141,28 +163,75 @@ class GlanceClock
     end
   end
 
+  def trim(t)
+    var m = re.search("^ *(.*[^ ]) *$", t)
+    return m == nil ? "" : m[1]
+  end
+
+  # "true=Closed, false=Open" -> {"true": "Closed", "false": "Open"}, keys in lower case
+  def parse_map(t)
+    var m = {}
+    for pair : string.split(t, ",")
+      var kv = string.split(pair, "=")
+      if size(kv) == 2 m[string.tolower(self.trim(kv[0]))] = self.trim(kv[1]) end
+    end
+    return m
+  end
+
   def setup()
-    var t = store.get("rtopic")
+    for i : 0..1 self.setup_reading(i) end
+  end
+
+  def setup_reading(i)
+    var t = store.get(self.rk[i][0])
     if size(t) == 0 return end
     # a restart (e.g. saving the settings) would leave the corner empty until the next message
-    if store.get("last_topic", "") == t self.show_reading(store.get("last_value")) end
-    mqtt.subscribe(t, / tp, p -> self.on_reading(p))
+    var lk = i == 0 ? "last" : "last2"
+    if store.get(lk + "_topic", "") == t self.show_reading(i, store.get(lk + "_value")) end
+    mqtt.subscribe(t, / tp, p -> self.on_reading(i, p))
   end
 
-  def on_reading(p)
+  def on_reading(i, p)
     p = str(p)
-    if p != store.get("last_value", nil)
-      store.set("last_topic", store.get("rtopic"))
-      store.set("last_value", p)
+    var lk = i == 0 ? "last" : "last2"
+    if p != store.get(lk + "_value", nil)
+      store.set(lk + "_topic", store.get(self.rk[i][0]))
+      store.set(lk + "_value", p)
     end
-    self.show_reading(p)
+    self.show_reading(i, p)
   end
 
-  # a number is rounded if asked; anything else (Open, Closed, ...) is shown as it came
-  def show_reading(p)
-    var v = num(p)
-    if v != nil && store.get("rround") p = str(int(v + (v < 0 ? -0.5 : 0.5))) end
-    self.reading = str(p) + store.get("runit")
+  # payload -> JSON field -> replacement or number with decimals and unit -> label in front
+  def show_reading(i, p)
+    var k = self.rk[i]
+    var v = p
+    var field = store.get(k[1])
+    if size(field) > 0
+      try v = json.load(p) except .. v = nil end
+      for part : string.split(field, ".")
+        v = isinstance(v, map) ? v.find(part) : nil
+      end
+      if v == nil return end            # not this message's field: keep what is shown
+    end
+    var s = type(v) == "bool" ? (v ? "true" : "false") : str(v)
+    var out = self.rmaps[i].find(string.tolower(s))
+    if out == nil
+      var n = num(s)
+      out = s
+      if n != nil
+        var d = store.get(k[3])
+        if d != "as sent" out = string.format("%." + d + "f", real(n)) end
+        out += store.get(k[4])
+      end
+    end
+    self.rlast[i] = now_ms()
+    self.rv[i] = store.get(k[5]) + out
+  end
+
+  def reading_text(i)
+    var st = int(store.get(self.rk[i][6]))
+    if st > 0 && now_ms() - self.rlast[i] > st * 60000 return store.get(self.rk[i][5]) + "off" end
+    return self.rv[i]
   end
 
   def loop()
@@ -394,7 +463,8 @@ class GlanceClock
     var icon = -1
     var isday = true
     if what == "date"           t = self.ds  k = 1
-    elif what == "reading"      t = self.reading  k = 3
+    elif what == "reading1"     t = self.reading_text(0)  k = 3
+    elif what == "reading2"     t = self.reading_text(1)  k = 3
     elif what == "humidity"     t = self.hum
     elif what == "feels"        t = self.feels
     elif what == "hilo"         t = self.hilo
