@@ -7,6 +7,8 @@ readings from your own sensors.
 
 ![Glance Clock: weather, time, a room temperature and the date, with the week bar](docs/default.png)
 
+**Get it on the AWTRIX Hub: [awtrix.de/script/fDmv7toQMZbE](https://awtrix.de/script/fDmv7toQMZbE)**
+
 Each of the four corners shows what you pick, by day and by night. Weather comes from
 [Open-Meteo](https://open-meteo.com): free, no account, no API key. The icons are drawn by the
 script, so there is nothing to install.
@@ -47,7 +49,10 @@ script, so there is nothing to install.
 
 ## Installation
 
-In the AWTRIX NG web UI, open **Scripts**, create a new script named `Glance-Clock`, paste
+**From the AWTRIX Hub:** open [Glance Clock on the Hub](https://awtrix.de/script/fDmv7toQMZbE) and
+send it to your clock.
+
+**Manually:** in the AWTRIX NG web UI, open **Scripts**, create a new script named `Glance-Clock`, paste
 [`glance-clock.ax`](glance-clock.ax) and save. Or upload it over HTTP:
 
 ```sh
