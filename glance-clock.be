@@ -38,7 +38,7 @@
 # @config  lang    select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday and month names" group="Date"
 # @config  wday    bool   "Weekday in the date"            default=true help="For the presets · a custom format uses ww" group="Date"
 # @config  dfmt    select "Date format"                    default=dd.mm options="dd.mm,dd.mm.yy,dd-mm,dd-mm-yy,mm/dd,mm/dd/yy,yyyy-mm-dd,mon dd,dd mon,custom" group="Date"
-# @config  dcust   text   "Custom date format"             default="d.mm.yy" maxlen=24 help="dd/d day · mm/m month · mon month name · yyyy/yy year · ww weekday · e.g. ww dd.mm" group="Date"
+# @config  dcust   text   "Custom date format"             default="d.mm.yy" maxlen=24 help="dd/d day · mm/m month · mon name · yyyy/yy year · ww weekday · 'text' as is · e.g. ww dd.mm" group="Date"
 # @config  wbar    bool   "Week bar"                       default=false help="Seven dashes on the bottom row, today lit" group="Week bar"
 # @config  wmon    bool   "Week starts on Monday"          default=true group="Week bar"
 # @config  lat     number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
@@ -346,7 +346,7 @@ class GlanceClock
     return store.get("wday") ? self.days[weekday()] + " " + s : s
   end
 
-  # turns a pattern such as dd.mm.yy into a date; longest token first, the rest as typed
+  # turns a pattern such as dd.mm.yy into a date; longest token first, 'quoted text' and the rest as typed
   def fmt_date(p)
     var d = day()
     var mo = month()
@@ -355,7 +355,11 @@ class GlanceClock
     var i = 0
     while i < size(p)
       var t = p[i..i + 3]
-      if t == "yyyy"                out += str(y)  i += 4
+      if t[0] == "'"                                   # 'text' in quotes is shown as typed
+        var e = string.find(p, "'", i + 1)
+        if e < 0 e = size(p) end
+        out += p[(i + 1) .. (e - 1)]  i = e + 1
+      elif t == "yyyy"                out += str(y)  i += 4
       elif t[0..1] == "yy"          out += (y % 100 < 10 ? "0" : "") + str(y % 100)  i += 2
       elif t[0..1] == "dd"          out += (d < 10 ? "0" : "") + str(d)  i += 2
       elif t[0..1] == "mm"          out += (mo < 10 ? "0" : "") + str(mo)  i += 2

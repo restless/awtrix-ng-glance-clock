@@ -80,7 +80,7 @@ The settings page has these groups, in this order.
 | **Date:** Language | English | weekday and month names: English, Polski, Deutsch, Français, Українська |
 | **Date:** Weekday in the date | on | for the presets; a custom format places the weekday itself with `ww` |
 | **Date:** Date format | dd.mm | dd.mm, dd.mm.yy, dd-mm, dd-mm-yy, mm/dd, mm/dd/yy, yyyy-mm-dd, mon dd (`OCT 28`), dd mon or custom |
-| **Date:** Custom date format | d.mm.yy | `dd` `d` `mm` `m` `mon` (month name) `yyyy` `yy` `ww` (weekday); anything else is shown as typed, e.g. `ww d·m` |
+| **Date:** Custom date format | d.mm.yy | `dd` `d` `mm` `m` `mon` (month name) `yyyy` `yy` `ww` (weekday); text in single quotes and anything else is shown as typed, e.g. `ww d·m` or `'Day' d` |
 | **Week bar:** Week bar | off | seven dashes on the bottom row, today lit |
 | **Week bar:** Week starts on Monday | on | |
 | **Weather:** Latitude, Longitude | Berlin | the place whose weather is shown |
