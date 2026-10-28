@@ -254,8 +254,14 @@ class GlanceClock
     for i : 0..3
       var t = store.get(self.rk[i][0])
       if size(t) == 0 continue end
-      # a restart (e.g. saving the settings) would leave the corner empty until the next message
-      if store.get(self.lk(i) + "_topic", "") == t self.format_reading(i, store.get(self.lk(i) + "_val")) end
+      # show the stored value at once after a restart, aged by when it was stored
+      var last = store.get("last" + str(i + 1), nil)
+      if isinstance(last, list) && size(last) == 4 && last[0] == t && last[1] == store.get(self.rk[i][1])
+        self.rraw[i] = last[2]
+        self.format_reading(i, last[2])
+        var e = epoch_ms()
+        if e > 0 && last[3] > 0 self.rlast[i] = now_ms() - (e - last[3]) end
+      end
       if !topics.contains(t) topics[t] = [] end
       topics[t].push(i)
     end
@@ -266,33 +272,44 @@ class GlanceClock
     mqtt.subscribe(t, / tp, p -> self.on_message(readers, str(p)))
   end
 
-  def lk(i)
-    return "last" + str(i + 1)
-  end
-
+  # the payload is parsed as JSON at most once, however many readings take a field from it
   def on_message(readers, p)
+    var doc = nil
+    var parsed = false
     for i : readers
-      var v = self.extract(i, p)
-      if v == nil continue end            # not this reading's field: keep what is shown
-      if v != store.get(self.lk(i) + "_val", nil)   # stored only when it changes, to spare the flash
-        store.set(self.lk(i) + "_topic", store.get(self.rk[i][0]))
-        store.set(self.lk(i) + "_val", v)
+      var field = store.get(self.rk[i][1])
+      var v
+      if size(field) == 0
+        v = self.clean(p)
+      else
+        if !parsed
+          try doc = json.load(p) except .. doc = nil end
+          parsed = true
+        end
+        v = doc
+        for part : string.split(field, ".")
+          v = isinstance(v, map) ? v.find(part) : nil
+        end
+        if v == nil continue end          # not this reading's field: keep what is shown
+        v = type(v) == "bool" ? (v ? "true" : "false") : str(v)
       end
       self.format_reading(i, v)
+      # stored for restarts when it changes, or every 10 minutes so its age stays honest
+      var e = epoch_ms()
+      if v != self.rraw[i] || (e > 0 && e - self.rsaved[i] > 600000)
+        store.set("last" + str(i + 1), [store.get(self.rk[i][0]), field, v, e])
+        self.rsaved[i] = e
+      end
+      self.rraw[i] = v
     end
   end
 
-  # the payload, or the chosen field of a JSON payload, as a string; nil when the field is missing
-  def extract(i, p)
-    var field = store.get(self.rk[i][1])
-    if size(field) == 0 return p end
-    var v
-    try v = json.load(p) except .. return nil end
-    for part : string.split(field, ".")
-      v = isinstance(v, map) ? v.find(part) : nil
-    end
-    if v == nil return nil end
-    return type(v) == "bool" ? (v ? "true" : "false") : str(v)
+  # a plain payload without surrounding white space or quotes: "ON\n" and "\"open\"" match ON and open
+  def clean(p)
+    var m = re.search("^[ \t\r\n]*(.*[^ \t\r\n])[ \t\r\n]*$", p)
+    p = m == nil ? "" : m[1]
+    if size(p) >= 2 && p[0] == '"' && p[size(p) - 1] == '"' p = p[1 .. size(p) - 2] end
+    return p
   end
 
   # replacement, or a number with its decimals and unit, then the label in front
@@ -305,11 +322,12 @@ class GlanceClock
       if n != nil
         var d = store.get(k[3])
         if d != "as sent" out = string.format("%." + d + "f", real(n)) end
+        if re.search("^-0(\\.0*)?$", out) != nil out = out[1 .. size(out) - 1] end     # -0.3 rounded is 0, not -0
         out += store.get(k[4])
       end
     end
     self.rlast[i] = now_ms()
-    self.rv[i] = store.get(k[5]) + out
+    self.rv[i] = self.rlabel[i] + out
   end
 
   def weather_stale()
