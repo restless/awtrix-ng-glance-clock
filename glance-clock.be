@@ -3,6 +3,7 @@
 # @author  restless
 # @version 0.3
 # @display 52x16
+# @config  tsep   select "Colon"                          default=steady options=steady,blink,pulse group="Time"
 # @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
 # @config  wday   bool   "Weekday in the date"            default=true group="Date"
 # @config  dfmt   select "Date format"                    default=dd.mm options=dd.mm,dd.mm.yy,dd-mm,dd-mm-yy,mm/dd,mm/dd/yy,yyyy-mm-dd,custom group="Date"
@@ -37,7 +38,7 @@
 
 class GlanceClock
   var url, ticks, busy
-  var ts, ds, out, reading, code, day
+  var ts, hh, mm, ds, out, reading, code, day
   var days
   var night, nfrom, nto, col
 
@@ -48,6 +49,8 @@ class GlanceClock
     self.ticks = 0
     self.busy = false
     self.ts = "--:--"
+    self.hh = "--"
+    self.mm = "--"
     self.ds = ""
     self.out = nil
     self.reading = nil
@@ -137,7 +140,9 @@ class GlanceClock
     var h = hour()
     if h >= 0
       var m = minute()
-      self.ts = (h < 10 ? "0" : "") + str(h) + ":" + (m < 10 ? "0" : "") + str(m)
+      self.hh = (h < 10 ? "0" : "") + str(h)
+      self.mm = (m < 10 ? "0" : "") + str(m)
+      self.ts = self.hh + ":" + self.mm
       self.ds = self.date_text()
       var n = self.is_night(h * 60 + m)
       if n != self.night self.switch_mode(n) end
@@ -255,11 +260,28 @@ class GlanceClock
     end
   end
 
+  # hh, colon and mm drawn apart so the colon can blink or pulse
+  def draw_time(x, y, c)
+    x += text(x, y, self.hh, c)
+    var sep = store.get("tsep")
+    var phase = now_ms() % 2000
+    var cc = c
+    if sep == "blink"
+      if phase >= 1000 cc = 0 end
+    elif sep == "pulse"
+      var f = phase < 1000 ? phase : 2000 - phase      # 0..1000..0 over two seconds
+      f = 250 + f * 3 / 4                               # never fully dark
+      cc = rgb(((c >> 16) & 255) * f / 1000, ((c >> 8) & 255) * f / 1000, (c & 255) * f / 1000)
+    end
+    x += text(x, y, ":", cc)
+    text(x, y, self.mm, c)
+  end
+
   def draw()
     clear()
     var w = width()
     # right column: time on top, date below, both right-aligned
-    text(w - text_ink_width(self.ts) - 1, 6, self.ts, self.col[0])
+    self.draw_time(w - text_ink_width(self.ts) - 1, 6, self.col[0])
     text(w - text_ink_width(self.ds) - 1, 14, self.ds, self.col[1])
     # left column: weather icon + outdoor temperature, the MQTT reading below
     if !self.night || store.get("nicon") self.wicon() end
