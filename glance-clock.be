@@ -3,6 +3,8 @@
 # @author  restless
 # @version 0.3
 # @display 52x16
+# @config  t12    select "Hour format"                    default=24h options=24h,12h group="Time"
+# @config  tlz    bool   "Leading zero"                   default=true help="08:05 rather than 8:05" group="Time"
 # @config  tsep   select "Colon"                          default=steady options=steady,blink,pulse group="Time"
 # @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
 # @config  wday   bool   "Weekday in the date"            default=true group="Date"
@@ -140,7 +142,12 @@ class GlanceClock
     var h = hour()
     if h >= 0
       var m = minute()
-      self.hh = (h < 10 ? "0" : "") + str(h)
+      var hd = h
+      if store.get("t12") == "12h"
+        hd = h % 12
+        if hd == 0 hd = 12 end
+      end
+      self.hh = (hd < 10 && store.get("tlz") ? "0" : "") + str(hd)
       self.mm = (m < 10 ? "0" : "") + str(m)
       self.ts = self.hh + ":" + self.mm
       self.ds = self.date_text()
