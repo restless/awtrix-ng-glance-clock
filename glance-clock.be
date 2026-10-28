@@ -8,6 +8,7 @@
 # @config  dfmt   select "Date format"                    default=dd.mm options=dd.mm,dd.mm.yy,mm/dd,mm/dd/yy group="Date"
 # @config  lat    number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
 # @config  lon    number "Longitude"                      default=13.405 min=-180 max=180 step=0.0001 group="Weather"
+# @config  unit   select "Temperature unit"               default=C options=C,F group="Weather"
 # @config  wref   number "Weather refresh"                default=10 min=5 max=60 unit=min group="Weather"
 # @config  rtopic text   "Room temperature (MQTT topic)"  default="" help="Empty hides it" group="Room"
 # @config  tcol   color  "Time colour"                    default=#FFFFFF group="Colours"
@@ -22,7 +23,8 @@ class GlanceClock
 
   def init()
     self.url = "https://api.open-meteo.com/v1/forecast?latitude=" + str(store.get("lat")) +
-               "&longitude=" + str(store.get("lon")) + "&current=temperature_2m,weather_code,is_day"
+               "&longitude=" + str(store.get("lon")) + "&current=temperature_2m,weather_code,is_day" +
+               (store.get("unit") == "F" ? "&temperature_unit=fahrenheit" : "")
     self.ticks = 0
     self.busy = false
     self.ts = "--:--"
