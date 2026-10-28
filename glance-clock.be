@@ -28,12 +28,12 @@
 # @config  nto    text   "Night until (hh:mm)"            default="07:00" maxlen=5 group="Night"
 # @config  nbri   slider "Night brightness"               default=8 min=0 max=255 help="0 leaves the device brightness alone" group="Night"
 # @config  nicon  bool   "Weather icon at night"          default=true group="Night"
-# @config  ntcol  color  "Time colour"                    default=#FF3000 group="Night"
-# @config  ndcol  color  "Date colour"                    default=#702000 group="Night"
-# @config  nocol  color  "Outdoor temperature colour"     default=#A03000 group="Night"
-# @config  nrcol  color  "Reading colour"                 default=#702000 group="Night"
-# @config  nwtd   color  "Week bar: today"                default=#A03000 group="Night"
-# @config  nwod   color  "Week bar: other days"           default=#200800 group="Night"
+# @config  ntcol  color  "Time colour"                    default=#30E040 group="Night"
+# @config  ndcol  color  "Date colour"                    default=#106A1C group="Night"
+# @config  nocol  color  "Outdoor temperature colour"     default=#1C9030 group="Night"
+# @config  nrcol  color  "Reading colour"                 default=#106A1C group="Night"
+# @config  nwtd   color  "Week bar: today"                default=#1C9030 group="Night"
+# @config  nwod   color  "Week bar: other days"           default=#04200A group="Night"
 
 class GlanceClock
   var url, ticks, busy
