@@ -286,10 +286,12 @@ class GlanceClock
     return self.night ? self.col[2] : c
   end
 
+  # a flat cumulus, 8 wide and 4 tall, so rain and snow fit below it
   def cloud(x, y, col)
-    circle_fill(x + 2, y + 4, 2, col)
-    circle_fill(x + 5, y + 3, 2, col)
-    rect_fill(x + 1, y + 4, 6, 3, col)
+    line(x + 2, y, x + 4, y, col)
+    line(x + 1, y + 1, x + 6, y + 1, col)
+    line(x, y + 2, x + 7, y + 2, col)
+    line(x + 1, y + 3, x + 6, y + 3, col)
   end
 
   # the icon for WMO weather code c, its top left corner at (x, y)
@@ -311,28 +313,30 @@ class GlanceClock
         pixel(x + 3, y, sun) pixel(x + 3, y + 6, sun) pixel(x, y + 3, sun) pixel(x + 6, y + 3, sun)
         pixel(x + 1, y + 1, sun) pixel(x + 5, y + 1, sun) pixel(x + 1, y + 5, sun) pixel(x + 5, y + 5, sun)
       else
-        circle_fill(x + 3, y + 3, 3, moon)
-        circle_fill(x + 5, y + 2, 3, 0x000000)
+        line(x + 2, y, x + 4, y, moon) line(x + 1, y + 1, x + 3, y + 1, moon)       # a crescent
+        line(x, y + 2, x + 2, y + 2, moon) line(x, y + 3, x + 2, y + 3, moon) line(x, y + 4, x + 2, y + 4, moon)
+        line(x + 1, y + 5, x + 3, y + 5, moon) line(x + 2, y + 6, x + 4, y + 6, moon)
       end
     elif c == 2
       circle_fill(x + 5, y + 2, 2, isday ? sun : moon)
-      self.cloud(x, y + 1, self.ic(0xC0C0C0))
+      self.cloud(x, y + 3, self.ic(0xC0C0C0))
     elif c == 3
-      self.cloud(x, y, self.ic(0x909090))
+      self.cloud(x + 1, y + 1, self.ic(0x707070))
+      self.cloud(x, y + 3, self.ic(0xA0A0A0))
     elif c == 45 || c == 48
       var f = self.ic(0x808080)
       line(x, y + 2, x + 7, y + 2, f) line(x + 1, y + 4, x + 6, y + 4, f) line(x, y + 6, x + 7, y + 6, f)
     elif c >= 71 && c <= 77 || c == 85 || c == 86
       var w = self.ic(0xFFFFFF)
-      self.cloud(x, y - 1, self.ic(0xA0A0A0))
-      pixel(x + 1, y + 7, w) pixel(x + 4, y + 6, w) pixel(x + 6, y + 7, w)
+      self.cloud(x, y, self.ic(0xA0A0A0))
+      pixel(x + 1, y + 5, w) pixel(x + 4, y + 6, w) pixel(x + 6, y + 5, w) pixel(x + 2, y + 7, w) pixel(x + 5, y + 7, w)
     elif c >= 95
-      self.cloud(x, y - 1, self.ic(0x707070))
-      line(x + 4, y + 5, x + 3, y + 6, sun) line(x + 3, y + 6, x + 5, y + 6, sun) pixel(x + 4, y + 7, sun)
+      self.cloud(x, y, self.ic(0x707070))
+      line(x + 4, y + 4, x + 3, y + 5, sun) line(x + 3, y + 5, x + 5, y + 5, sun) line(x + 5, y + 5, x + 3, y + 7, sun)
     else                          # drizzle and rain: 51-67, 80-82
       var d = self.ic(0x3080FF)
-      self.cloud(x, y - 1, self.ic(0x8090A0))
-      pixel(x + 1, y + 6, d) pixel(x + 4, y + 7, d) pixel(x + 6, y + 6, d) pixel(x + 2, y + 7, d)
+      self.cloud(x, y, self.ic(0x8090A0))
+      line(x + 1, y + 5, x, y + 7, d) line(x + 4, y + 5, x + 3, y + 7, d) line(x + 7, y + 5, x + 6, y + 7, d)
     end
   end
 

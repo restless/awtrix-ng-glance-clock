@@ -18,6 +18,8 @@ leave one empty. An optional week bar on the bottom row lights today.
 Weather comes from [Open-Meteo](https://open-meteo.com): free, no account, no API key. The icons
 are drawn by the script, so there is nothing to install.
 
+![The icons: clear day and night, partly cloudy, cloudy, fog, rain, snow, thunderstorm, sunrise, sunset](docs/icons.png)
+
 ## Features
 
 - Four corners, each showing whatever you pick: weather, time, date, an MQTT reading, the
