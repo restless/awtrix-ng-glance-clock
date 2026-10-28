@@ -1,7 +1,7 @@
 # @name    Glance Clock
 # @desc    Time, date, outdoor weather with an icon and an MQTT reading on one screen, small and tidy (52x16 and larger)
 # @author  restless
-# @version 0.1
+# @version 0.2
 # @display 52x16
 # @config  lang   select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday names" group="Date"
 # @config  wday   bool   "Weekday in the date"            default=true group="Date"
