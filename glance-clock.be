@@ -38,7 +38,7 @@
 # @config  lang    select "Language"                       default=English options=English,Polski,Deutsch,Français,Українська help="Weekday and month names" group="Date"
 # @config  wday    bool   "Weekday in the date"            default=true help="For the presets · a custom format uses ww" group="Date"
 # @config  dfmt    select "Date format"                    default=dd.mm options="dd.mm,dd.mm.yy,dd-mm,dd-mm-yy,mm/dd,mm/dd/yy,yyyy-mm-dd,mon dd,dd mon,custom" group="Date"
-# @config  dcust   text   "Custom date format"             default="d.mm.yy" maxlen=24 help="dd/d day · mm/m month · mon name · yyyy/yy year · ww weekday · 'text' as is · e.g. ww dd.mm" group="Date"
+# @config  dcust   text   "Custom date format"             default="d.mm.yy" maxlen=24 help="dd/d day · mm/m month · mon name · yyyy/yy year · ww weekday · 'text' · e.g. ww dd.mm" group="Date"
 # @config  wbar    bool   "Week bar"                       default=false help="Seven dashes on the bottom row, today lit" group="Week bar"
 # @config  wmon    bool   "Week starts on Monday"          default=true group="Week bar"
 # @config  lat     number "Latitude"                       default=52.52 min=-90 max=90 step=0.0001 group="Weather"
@@ -151,6 +151,15 @@ class GlanceClock
       "Weather tomorrow": "tomorrow", "Tomorrow": "tomorrow", "Rain chance today": "rain", "Wind": "wind",
       "Sunrise/sunset": "sun", "Empty": "none"
     }
+    var old = {"weather": "Weather now", "time": "Time", "date": "Date", "reading": "MQTT reading 1",
+               "MQTT reading": "MQTT reading 1", "humidity": "Humidity outdoors", "feels": "Feels like",
+               "hilo": "High/low today", "tomorrow": "Weather tomorrow", "Tomorrow": "Weather tomorrow",
+               "none": "Empty"}
+    for k : ["tl", "tr", "bl", "br", "ntl", "ntr", "nbl", "nbr"]
+      if old.contains(store.get(k)) store.set(k, old[store.get(k)]) end
+    end
+    var oldn = {"off": "Off", "schedule": "Scheduled", "on": "Always"}
+    if oldn.contains(store.get("nmode")) store.set("nmode", oldn[store.get("nmode")]) end
     self.dslots = []
     self.nslots = []
     for i : 0..3
@@ -436,7 +445,10 @@ class GlanceClock
       return
     end
     var t = re.search("temperature_2m\":(-?[0-9.]+)", b)
-    if t != nil self.wxok = now_ms() end
+    if t == nil return end             # not a forecast (an error page): keep what is shown
+    self.wxok = now_ms()
+    self.hum = nil  self.feels = nil  self.hilo = nil  self.tmax = nil  self.rain = nil  self.wind = nil
+    self.tcode = -1  self.sunev = nil  self.suntxt = nil  self.sunicon = -1
     var c = re.search("weather_code\":([0-9]+)", b)
     var d = re.search("is_day\":([01])", b)
     var h = re.search("relative_humidity_2m\":([0-9.]+)", b)
