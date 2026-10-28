@@ -32,7 +32,7 @@ are drawn by the script, so there is nothing to install.
 - Optional week bar: seven dashes on the bottom row with today lit
 - Outdoor temperature in °C or °F with a weather icon: clear (sun or moon), partly cloudy, cloudy, fog, rain,
   snow and thunderstorm
-- Two readings from your MQTT broker: a plain value or one field of a JSON message (as sent by
+- Up to four readings from your MQTT broker: a plain value or one field of a JSON message (as sent by
   Zigbee2MQTT, Tasmota or Shelly), with replacements such as `true=Closed`, decimals, a unit, a
   short label, and `off` when the sensor goes quiet
 
@@ -75,16 +75,16 @@ The default is Berlin.
 | Temperature unit | C | C or F |
 | Wind unit | km/h | km/h, m/s or mph |
 | Weather refresh | 10 min | how often the weather is fetched |
-| **MQTT reading 1, 2:** Topic | empty | a topic on the broker set in AWTRIX's MQTT settings |
-| **MQTT reading 1, 2:** JSON field | empty | empty for a plain value; `temperature` for `{"temperature":21.5}`; `a.b` for nested values |
-| **MQTT reading 1, 2:** Replace values | empty | comma separated, case-insensitive: `true=Closed,false=Open`, `ON=On,OFF=Off` |
-| **MQTT reading 1, 2:** Decimals | 0 | as sent, 0, 1 or 2 |
-| **MQTT reading 1, 2:** Unit | ° | added after numbers, e.g. `°` or `%` |
-| **MQTT reading 1, 2:** Label | empty | short text before the value, e.g. `In` |
-| **MQTT reading 1, 2:** Offline after | 0 | minutes without a message before it shows `off`; 0 never |
+| **MQTT reading 1–4:** Topic | empty | a topic on the broker set in AWTRIX's MQTT settings |
+| **MQTT reading 1–4:** JSON field | empty | empty for a plain value; `temperature` for `{"temperature":21.5}`; `a.b` for nested values |
+| **MQTT reading 1–4:** Replace values | empty | comma separated, case-insensitive: `true=Closed,false=Open`, `ON=On,OFF=Off` |
+| **MQTT reading 1–4:** Decimals | 0 | as sent, 0, 1 or 2 |
+| **MQTT reading 1–4:** Unit | ° | added after numbers, e.g. `°` or `%` |
+| **MQTT reading 1–4:** Label | empty | short text before the value, e.g. `In` |
+| **MQTT reading 1–4:** Offline after | 0 | minutes without a message before it shows `off`; 0 never |
 | **Day:** Brightness | 0 | 0 leaves the device brightness alone; otherwise set when night mode ends |
 | **Day:** colours | | time, date, weather (temperature, humidity, wind, rain, sun times), MQTT reading, week bar today and other days |
-| **Night:** Night mode | off | off, schedule or on |
+| **Night:** Night mode | Off | Off, Scheduled (between From and Until) or Always |
 | **Night:** From, Until | 22:00, 07:00 | the schedule; it may wrap past midnight |
 | **Night:** Weather icons | on | |
 | **Night:** Brightness | 8 | 0 leaves the device brightness alone |
@@ -101,7 +101,7 @@ on the left; keep them short.
 | Weather now | icon and outdoor temperature | internet |
 | Time | the time | |
 | Date | the date, as set under Date | |
-| MQTT reading 1, MQTT reading 2 | that reading | an MQTT broker |
+| MQTT reading 1–4 | that reading | an MQTT broker |
 | Humidity outdoors | outdoor relative humidity, e.g. `42%` | internet |
 | Feels like | feels-like temperature, e.g. `~10°` | internet |
 | High/low today | today's high and low, e.g. `14/5°` | internet |

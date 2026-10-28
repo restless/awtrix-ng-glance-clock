@@ -57,7 +57,7 @@
 # @config  rcol    color  "MQTT reading colour"            default=#40C0FF group="Day"
 # @config  wtd     color  "Week bar: today colour"         default=#FFFFFF group="Day"
 # @config  wod     color  "Week bar: other days colour"    default=#404040 group="Day"
-# @config  nmode   select "Night mode"                     default=off options=off,schedule,on help="schedule: between the two times below" group="Night"
+# @config  nmode   select "Night mode"                     default="Off" options="Off,Scheduled,Always" help="Off: never. Scheduled: from the From time until the Until time. Always: all day" group="Night"
 # @config  nfrom   text   "From (hh:mm)"                   default="22:00" maxlen=5 group="Night"
 # @config  nto     text   "Until (hh:mm)"                  default="07:00" maxlen=5 group="Night"
 # @config  nicon   bool   "Weather icons"                  default=true group="Night"
@@ -162,8 +162,8 @@ class GlanceClock
 
   def is_night(now)
     var mode = store.get("nmode")
-    if mode == "on" return true end
-    if mode != "schedule" || self.nfrom == nil || self.nto == nil || self.nfrom == self.nto return false end
+    if mode == "Always" || mode == "on" return true end           # on and schedule: stored by 0.3 to 0.6
+    if (mode != "Scheduled" && mode != "schedule") || self.nfrom == nil || self.nto == nil || self.nfrom == self.nto return false end
     if self.nfrom < self.nto return now >= self.nfrom && now < self.nto end
     return now >= self.nfrom || now < self.nto        # the window wraps past midnight
   end
