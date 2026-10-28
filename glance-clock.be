@@ -85,9 +85,10 @@ class GlanceClock
   var rk, rv, rlast, rmaps
   var hum, feels, hilo, tmax, tcode, rain, wind
   var sunev, suntxt, sunicon
-  var days, months, secs
+  var days, months, secs, lastmin
   var night, nfrom, nto, col
-  var slots, dslots, nslots
+  var slots, dslots, nslots, order
+  var tsep, tsec, wbar, wmon, icons, wstale, rstale, rlabel, roff, rraw, rsaved
 
   def init()
     self.url = "https://api.open-meteo.com/v1/forecast?latitude=" + str(store.get("lat")) +
@@ -134,6 +135,7 @@ class GlanceClock
       "Українська": ["СІЧ", "ЛЮТ", "БЕР", "КВІ", "ТРА", "ЧЕР", "ЛИП", "СЕР", "ВЕР", "ЖОВ", "ЛИС", "ГРУ"]
     }
     self.months = mnames.find(store.get("lang"), mnames["English"])
+    self.lastmin = -1
     self.secs = []                    # "00".."59", so drawing the seconds allocates nothing per frame
     for i : 0..59 self.secs.push((i < 10 ? "0" : "") + str(i)) end
     self.night = nil
@@ -158,6 +160,23 @@ class GlanceClock
       self.nslots.push(nv == "Same as day" ? self.dslots[i] : ids.find(nv, nv))
     end
     self.slots = self.dslots
+    self.order = [0, 2, 1, 3]          # left corners first, right ones on top
+    self.tsep = store.get("tsep")
+    self.tsec = store.get("tsec")
+    self.wbar = store.get("wbar")
+    self.wmon = store.get("wmon")
+    self.icons = [store.get("dicon"), store.get("nicon")]
+    self.wstale = int(store.get("wstale")) * 60000
+    self.rstale = []
+    self.rlabel = []
+    self.roff = []
+    for i : 0..3
+      self.rstale.push(int(store.get(self.rk[i][6])) * 60000)
+      self.rlabel.push(store.get(self.rk[i][5]))
+      self.roff.push(self.rlabel[i] + "off")
+    end
+    self.rraw = [nil, nil, nil, nil]
+    self.rsaved = [0, 0, 0, 0]
   end
 
   # "22:00" -> minutes after midnight, nil if it does not read as a time
@@ -284,13 +303,11 @@ class GlanceClock
   end
 
   def weather_stale()
-    var st = int(store.get("wstale"))
-    return st > 0 && now_ms() - self.wxok > st * 60000
+    return self.wstale > 0 && now_ms() - self.wxok > self.wstale
   end
 
   def reading_text(i)
-    var st = int(store.get(self.rk[i][6]))
-    if st > 0 && now_ms() - self.rlast[i] > st * 60000 return store.get(self.rk[i][5]) + "off" end
+    if self.rstale[i] > 0 && now_ms() - self.rlast[i] > self.rstale[i] return self.roff[i] end
     return self.rv[i]
   end
 
@@ -298,16 +315,7 @@ class GlanceClock
     var h = hour()
     if h >= 0
       var m = minute()
-      var hd = h
-      self.ap = ""
-      if store.get("t12") == "12h"
-        hd = h % 12
-        if hd == 0 hd = 12 end
-        if store.get("ampm") self.ap = h < 12 ? "AM" : "PM" end
-      end
-      self.hh = (hd < 10 && store.get("tlz") ? "0" : "") + str(hd)
-      self.mm = (m < 10 ? "0" : "") + str(m)
-      self.ts = self.hh + ":" + self.mm + (store.get("tsec") ? ":00" : "") + self.ap      # for the width
+      self.build_time(h, m)
       self.ds = self.date_text()
       if self.sunev != nil
         var now = h * 60 + m
@@ -324,6 +332,21 @@ class GlanceClock
       http.get(self.url, / b, st -> self.on_wx(b, st), {'cap': 4096})
     end
     self.ticks -= 1
+  end
+
+  # hh, mm and the AM/PM marker for the clock; ts is the whole string, for the width
+  def build_time(h, m)
+    var hd = h
+    self.ap = ""
+    if store.get("t12") == "12h"
+      hd = h % 12
+      if hd == 0 hd = 12 end
+      if store.get("ampm") self.ap = h < 12 ? "AM" : "PM" end
+    end
+    self.hh = (hd < 10 && store.get("tlz") ? "0" : "") + str(hd)
+    self.mm = (m < 10 ? "0" : "") + str(m)
+    self.ts = self.hh + ":" + self.mm + (self.tsec ? ":00" : "") + self.ap
+    self.lastmin = m
   end
 
   # minutes after midnight as h:mm in the clock's hour format, without the colon effects
@@ -493,17 +516,22 @@ class GlanceClock
     var seg = (w + 1) / 7 - 1
     var x = (w - (7 * seg + 6)) / 2
     var today = weekday()
-    if store.get("wmon") today = (today + 6) % 7 end
-    for i : 0..6
+    if today < 0 return end            # the clock does not know the date yet
+    if self.wmon today = (today + 6) % 7 end
+    var i = 0
+    while i < 7
       line(x, height() - 1, x + seg - 1, height() - 1, i == today ? self.col[4] : self.col[5])
       x += seg + 1
+      i += 1
     end
   end
 
   # hh, colon and mm drawn apart so the colon can blink or pulse
   def draw_time(x, y, c)
+    var m = minute()
+    if m >= 0 && m != self.lastmin self.build_time(hour(), m) end   # loop() may run late in the second
     x += text(x, y, self.hh, c)
-    var sep = store.get("tsep")
+    var sep = self.tsep
     var phase = now_ms() % 2000
     var cc = c
     if sep == "blink"
@@ -515,7 +543,7 @@ class GlanceClock
     end
     x += text(x, y, ":", cc)
     x += text(x, y, self.mm, c)
-    if store.get("tsec")
+    if self.tsec
       var sec = second()
       x += text(x, y, ":", cc)
       x += text(x, y, self.secs[sec < 0 ? 0 : sec], c)
@@ -556,13 +584,13 @@ class GlanceClock
     if k == 2 && what != "none" && self.weather_stale()                  # every weather element when the forecast is old
       t = "off"  icon = -1
     end
-    if !store.get(self.night ? "nicon" : "dicon") icon = -1 end
+    if !self.icons[self.night ? 1 : 0] icon = -1 end
     var tw = t != nil ? text_ink_width(t) : 0
     var iw = icon >= 0 ? 10 : 0
     var x = right ? w - tw - iw - 1 : (iw > 0 ? 0 : 1)
     if right && (t != nil || icon >= 0) self.clear_from(x, y) end
     if icon >= 0      # a bottom icon moves up a row to keep clear of the week bar
-      self.wicon(x, y - (i >= 2 && store.get("wbar") ? 7 : 6), icon, isday)
+      self.wicon(x, y - (i >= 2 && self.wbar ? 7 : 6), icon, isday)
     end
     if t != nil text(x + iw, y, t, self.col[k]) end
   end
@@ -576,8 +604,8 @@ class GlanceClock
   def draw()
     clear()
     var w = width()
-    for i : [0, 2, 1, 3] self.draw_slot(i, w) end      # left corners first, right ones on top
-    if store.get("wbar") self.week_bar(w) end
+    for i : self.order self.draw_slot(i, w) end
+    if self.wbar self.week_bar(w) end
   end
 end
 
